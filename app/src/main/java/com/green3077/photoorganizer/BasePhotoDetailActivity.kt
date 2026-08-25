@@ -5,6 +5,8 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
+import androidx.activity.result.ActivityResultLauncher
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
@@ -46,7 +48,7 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
         }
     private val deleter by lazy { PhotoDeleter(this, deleteLauncher) }
 
-    private val moveLauncher =
+    private val moveLauncher: ActivityResultLauncher<IntentSenderRequest> =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 mover.applyMove(pendingMoveUris, pendingMoveFolder)
@@ -55,7 +57,7 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
                 loadPhotos()
             }
         }
-    private val mover by lazy { PhotoMover(this, moveLauncher) }
+    private val mover: PhotoMover by lazy { PhotoMover(this, moveLauncher) }
 
     /** 잘못된 인텐트면 false를 반환한다 — 호출한 쪽에서 바로 finish() 처리한다. */
     protected abstract fun parseExtras(): Boolean
