@@ -104,6 +104,9 @@ class DetailActivity : AppCompatActivity() {
         startActivity(
             Intent(this, PhotoViewerActivity::class.java).apply {
                 putExtra(PhotoViewerActivity.EXTRA_INDEX, index)
+                putExtra(PhotoViewerActivity.EXTRA_MONTH, monthDay.monthValue)
+                putExtra(PhotoViewerActivity.EXTRA_DAY, monthDay.dayOfMonth)
+                putExtra(PhotoViewerActivity.EXTRA_YEAR, photo.dateTaken.year)
             }
         )
     }
