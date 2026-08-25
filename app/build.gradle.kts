@@ -15,7 +15,21 @@ android {
         versionName = "1.0"
     }
 
+    signingConfigs {
+        getByName("debug") {
+            // 저장소에 커밋된 고정 디버그 키. CI/로컬 어디서 빌드하든 서명이 같아야
+            // 기기에 이미 설치된 앱 위에 새 APK를 덮어 설치(업데이트)할 수 있다.
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
+    }
+
     buildTypes {
+        debug {
+            signingConfig = signingConfigs.getByName("debug")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
