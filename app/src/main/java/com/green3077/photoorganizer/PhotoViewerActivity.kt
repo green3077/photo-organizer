@@ -58,7 +58,7 @@ class PhotoViewerActivity : AppCompatActivity() {
         }
         lifecycleScope.launch {
             val byId = repository.loadAllPhotos().associateBy { it.id }
-            val restored = ids.mapNotNull { byId[it] }
+            val restored = ids.toList().mapNotNull { byId[it] }
             if (restored.isEmpty()) {
                 finish()
                 return@launch
