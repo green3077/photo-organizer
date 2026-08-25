@@ -10,4 +10,6 @@ object DateFormat {
         val diff = today.year - year
         return if (diff <= 0) "${year}년" else "${year}년 · ${diff}년 전"
     }
+
+    fun fullDateLabel(date: LocalDate): String = "${date.year}년 ${date.monthValue}월 ${date.dayOfMonth}일"
 }

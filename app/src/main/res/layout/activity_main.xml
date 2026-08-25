@@ -16,6 +16,24 @@
             android:title="@string/app_name"
             app:menu="@menu/menu_main" />
 
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:tabMode="fixed">
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tab_by_date" />
+
+            <com.google.android.material.tabs.TabItem
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tab_by_location" />
+
+        </com.google.android.material.tabs.TabLayout>
+
     </com.google.android.material.appbar.AppBarLayout>
 
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -47,18 +65,18 @@
                 android:visibility="gone">
 
                 <TextView
+                    android:id="@+id/emptyTitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="@string/empty_recurring_title"
                     android:textSize="16sp" />
 
                 <TextView
+                    android:id="@+id/emptySubtitle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="8dp"
                     android:gravity="center"
-                    android:text="@string/empty_recurring_subtitle"
                     android:textColor="@color/text_secondary"
                     android:textSize="14sp" />
 
@@ -75,6 +93,7 @@
                 android:visibility="gone">
 
                 <TextView
+                    android:id="@+id/permissionText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"

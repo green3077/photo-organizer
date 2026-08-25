@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.core.content.ContextCompat
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
+import com.green3077.photoorganizer.data.ChallengeSettings
 import com.green3077.photoorganizer.data.PhotoRepository
 import java.time.LocalDate
 import java.time.MonthDay
@@ -14,6 +15,10 @@ import java.time.MonthDay
 class DailyMemoryWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
     override suspend fun doWork(): Result {
+        if (!ChallengeSettings.isEnabled(applicationContext)) {
+            return Result.success()
+        }
+
         val mediaPermission =
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) Manifest.permission.READ_MEDIA_IMAGES
             else Manifest.permission.READ_EXTERNAL_STORAGE

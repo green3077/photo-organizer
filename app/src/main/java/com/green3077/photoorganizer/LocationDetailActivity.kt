@@ -17,15 +17,20 @@ import com.green3077.photoorganizer.ui.PhotoViewerHolder
 import com.green3077.photoorganizer.util.DateFormat
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.MonthDay
 
-class DetailActivity : AppCompatActivity() {
+/**
+ * 한 장소 그룹에 속한 사진들을 날짜별로 묶어 보여준다. DetailActivity와 레이아웃/메뉴를 공유하고,
+ * 장소 그룹은 (클러스터링 결과가 아니라) 사진 ID 목록으로 전달받아 매번 Repository에서 다시 걸러낸다 —
+ * static 홀더에 의존하지 않아 프로세스가 재생성돼도 안전하다.
+ */
+class LocationDetailActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityDetailBinding
     private lateinit var adapter: DetailListAdapter
-    private lateinit var monthDay: MonthDay
+    private lateinit var photoIds: LongArray
+    private var placeName: String = ""
     private val repository by lazy { PhotoRepository(this) }
-    private var photosByYear: Map<Int, List<Photo>> = emptyMap()
+    private var photosByDate: Map<LocalDate, List<Photo>> = emptyMap()
     private val selectedIds = mutableSetOf<Long>()
 
     private val deleteLauncher =
@@ -41,18 +46,18 @@ class DetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val month = intent.getIntExtra(EXTRA_MONTH, -1)
-        val day = intent.getIntExtra(EXTRA_DAY, -1)
-        if (month == -1 || day == -1) {
+        val ids = intent.getLongArrayExtra(EXTRA_PHOTO_IDS)
+        if (ids == null || ids.isEmpty()) {
             finish()
             return
         }
-        monthDay = MonthDay.of(month, day)
+        photoIds = ids
+        placeName = intent.getStringExtra(EXTRA_PLACE_NAME) ?: getString(R.string.title_location_detail)
 
         binding = ActivityDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
-        binding.toolbar.title = DateFormat.monthDayLabel(monthDay)
+        binding.toolbar.title = placeName
         binding.toolbar.setNavigationOnClickListener { finish() }
         binding.toolbar.setOnMenuItemClickListener { item ->
             if (item.itemId == R.id.action_delete) {
@@ -84,13 +89,16 @@ class DetailActivity : AppCompatActivity() {
 
     private fun loadPhotos() {
         lifecycleScope.launch {
+            val idSet = photoIds.toSet()
             val allPhotos = repository.loadAllPhotos()
-            photosByYear = repository.photosForMonthDay(allPhotos, monthDay)
-            selectedIds.retainAll(photosByYear.values.flatten().map { it.id }.toSet())
-            val sections = photosByYear.mapKeys { (year, _) -> DateFormat.yearLabel(year, LocalDate.now()) }
+            photosByDate = allPhotos.filter { it.id in idSet }
+                .groupBy { it.dateTaken }
+                .toSortedMap(compareByDescending { it })
+            selectedIds.retainAll(photosByDate.values.flatten().map { it.id }.toSet())
+            val sections = photosByDate.mapKeys { (date, _) -> DateFormat.fullDateLabel(date) }
             adapter.submit(sections)
-            binding.emptyState.visibility = if (photosByYear.isEmpty()) View.VISIBLE else View.GONE
-            binding.recyclerPhotos.visibility = if (photosByYear.isEmpty()) View.GONE else View.VISIBLE
+            binding.emptyState.visibility = if (photosByDate.isEmpty()) View.VISIBLE else View.GONE
+            binding.recyclerPhotos.visibility = if (photosByDate.isEmpty()) View.GONE else View.VISIBLE
             updateSelectionUi()
         }
     }
@@ -100,13 +108,13 @@ class DetailActivity : AppCompatActivity() {
             toggleSelection(photo)
             return
         }
-        val yearPhotos = photosByYear[photo.dateTaken.year].orEmpty()
-        PhotoViewerHolder.photos = yearPhotos
-        val index = yearPhotos.indexOfFirst { it.id == photo.id }.coerceAtLeast(0)
+        val datePhotos = photosByDate[photo.dateTaken].orEmpty()
+        PhotoViewerHolder.photos = datePhotos
+        val index = datePhotos.indexOfFirst { it.id == photo.id }.coerceAtLeast(0)
         startActivity(
             Intent(this, PhotoViewerActivity::class.java).apply {
                 putExtra(PhotoViewerActivity.EXTRA_INDEX, index)
-                putExtra(PhotoViewerActivity.EXTRA_PHOTO_IDS, yearPhotos.map { it.id }.toLongArray())
+                putExtra(PhotoViewerActivity.EXTRA_PHOTO_IDS, datePhotos.map { it.id }.toLongArray())
             }
         )
     }
@@ -122,19 +130,19 @@ class DetailActivity : AppCompatActivity() {
         binding.toolbar.title = if (selectedIds.isNotEmpty()) {
             getString(R.string.selected_count, selectedIds.size)
         } else {
-            DateFormat.monthDayLabel(monthDay)
+            placeName
         }
     }
 
     private fun confirmDelete() {
-        val urisToDelete = photosByYear.values.flatten()
+        val urisToDelete = photosByDate.values.flatten()
             .filter { selectedIds.contains(it.id) }
             .map { it.uri }
         deleter.requestDelete(urisToDelete)
     }
 
     companion object {
-        const val EXTRA_MONTH = "extra_month"
-        const val EXTRA_DAY = "extra_day"
+        const val EXTRA_PHOTO_IDS = "extra_photo_ids"
+        const val EXTRA_PLACE_NAME = "extra_place_name"
     }
 }
