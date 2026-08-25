@@ -12,6 +12,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.tabs.TabLayout
 import com.green3077.photoorganizer.data.LocationRepository
 import com.green3077.photoorganizer.data.PhotoRepository
@@ -68,6 +69,10 @@ class MainActivity : AppCompatActivity() {
             when (item.itemId) {
                 R.id.action_pick_date -> {
                     showDatePicker()
+                    true
+                }
+                R.id.action_pick_year -> {
+                    showYearPicker()
                     true
                 }
                 R.id.action_settings -> {
@@ -222,6 +227,24 @@ class MainActivity : AppCompatActivity() {
             Intent(this, DetailActivity::class.java).apply {
                 putExtra(DetailActivity.EXTRA_MONTH, monthDay.monthValue)
                 putExtra(DetailActivity.EXTRA_DAY, monthDay.dayOfMonth)
+            }
+        )
+    }
+
+    private fun showYearPicker() {
+        val years = allPhotos.map { it.dateTaken.year }.distinct().sortedDescending()
+        if (years.isEmpty()) return
+        val items = years.map { getString(R.string.title_year_detail, it) }.toTypedArray()
+        MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.pick_year))
+            .setItems(items) { _, index -> openYearDetail(years[index]) }
+            .show()
+    }
+
+    private fun openYearDetail(year: Int) {
+        startActivity(
+            Intent(this, YearDetailActivity::class.java).apply {
+                putExtra(YearDetailActivity.EXTRA_YEAR, year)
             }
         )
     }

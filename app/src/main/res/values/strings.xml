@@ -25,4 +25,15 @@
     <string name="title_settings">챌린지 설정</string>
     <string name="settings_enable_label">정리 챌린지 알림</string>
     <string name="settings_time_label">알림 시간</string>
+
+    <string name="pick_year">연도별 정리</string>
+    <string name="title_year_detail">%1$d년 사진</string>
+
+    <string name="share">공유</string>
+    <string name="share_title">사진 공유</string>
+    <string name="move">이동</string>
+    <string name="move_dialog_title">어느 폴더로 옮길까요?</string>
+    <string name="move_confirm">이동</string>
+    <string name="move_done">%1$d장을 \'%2$s\' 폴더로 옮겼어요.</string>
+    <string name="default_move_folder">정리한사진</string>
 </resources>

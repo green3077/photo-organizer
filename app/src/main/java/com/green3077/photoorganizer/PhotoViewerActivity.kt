@@ -1,5 +1,6 @@
 package com.green3077.photoorganizer
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -33,10 +34,17 @@ class PhotoViewerActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         binding.toolbar.setNavigationOnClickListener { finish() }
         binding.toolbar.setOnMenuItemClickListener { item ->
-            if (item.itemId == R.id.action_delete) {
-                photos.getOrNull(binding.pager.currentItem)?.let { deleter.requestDelete(listOf(it.uri)) }
-                true
-            } else false
+            when (item.itemId) {
+                R.id.action_delete -> {
+                    photos.getOrNull(binding.pager.currentItem)?.let { deleter.requestDelete(listOf(it.uri)) }
+                    true
+                }
+                R.id.action_share -> {
+                    photos.getOrNull(binding.pager.currentItem)?.let { sharePhoto(it) }
+                    true
+                }
+                else -> false
+            }
         }
 
         // 삭제 확인 시스템 다이얼로그가 떠 있는 동안 프로세스가 종료되면 static 홀더가
@@ -67,6 +75,15 @@ class PhotoViewerActivity : AppCompatActivity() {
             PhotoViewerHolder.photos = restored
             showPager(intent.getIntExtra(EXTRA_INDEX, 0))
         }
+    }
+
+    private fun sharePhoto(photo: Photo) {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "image/*"
+            putExtra(Intent.EXTRA_STREAM, photo.uri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        startActivity(Intent.createChooser(intent, getString(R.string.share_title)))
     }
 
     private fun showPager(index: Int) {
