@@ -2,7 +2,7 @@
 <resources>
     <string name="app_name">사진정리</string>
     <string name="title_detail">날짜별 사진</string>
-    <string name="title_date_organize">날짜별 정리</string>
+    <string name="title_date_organize">일자별 정리</string>
     <string name="pick_date">날짜 선택</string>
     <string name="delete">삭제</string>
     <string name="allow_access">사진 접근 허용하기</string>
@@ -46,7 +46,7 @@
     <string name="select_photos_first">사진을 먼저 선택해주세요.</string>
     <string name="year_filter_all">전체</string>
 
-    <string name="home_date_menu">날짜별 정리</string>
+    <string name="home_date_menu">일자별 정리</string>
     <string name="home_date_menu_subtitle">반복되는 날짜 · 연도별 · 나라별</string>
 
     <string name="home_calendar_menu">달력으로 보기</string>
@@ -55,6 +55,7 @@
     <string name="calendar_month_title">%1$d년 %2$d월</string>
     <string name="prev_month">이전 달</string>
     <string name="next_month">다음 달</string>
+    <string name="pick_year_month">연도·월 선택</string>
 
     <string name="toggle_grid_view">바둑판 보기</string>
     <string name="toggle_list_view">목록 보기</string>

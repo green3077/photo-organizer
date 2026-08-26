@@ -5,25 +5,30 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.green3077.photoorganizer.data.PhotoRepository
 import com.green3077.photoorganizer.databinding.ActivityCalendarBinding
+import com.green3077.photoorganizer.databinding.DialogMonthPickerBinding
 import com.green3077.photoorganizer.model.CalendarCell
 import com.green3077.photoorganizer.model.Photo
 import com.green3077.photoorganizer.ui.CalendarDayAdapter
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
+import kotlin.math.ceil
 
 /**
  * 홈 화면 "달력으로 보기" — 이번 달(기본값) 달력을 보여주고, 사진이 있는 날짜 칸에는
  * 그날의 대표 사진 한 장을 채워 넣는다(왼쪽 위 날짜, 오른쪽 아래 장수). 칸을 누르면
- * 그 날짜의 사진들을 모아 보는 DayDetailActivity로 이동한다.
+ * 그 날짜의 사진들을 모아 보는 DayDetailActivity로 이동한다. 상단의 "N년 N월"을 누르면
+ * 연/월을 바로 골라 멀리 떨어진 달로 한 번에 이동할 수 있다.
  */
 class CalendarActivity : AppCompatActivity() {
 
@@ -57,6 +62,7 @@ class CalendarActivity : AppCompatActivity() {
             currentMonth = currentMonth.plusMonths(1)
             renderMonth()
         }
+        binding.textMonth.setOnClickListener { showMonthPicker() }
         binding.btnGrantPermission.setOnClickListener {
             requestPermissionLauncher.launch(requiredPermissions())
         }
@@ -103,6 +109,41 @@ class CalendarActivity : AppCompatActivity() {
             cells.add(CalendarCell.Day(date, dayPhotos.firstOrNull(), dayPhotos.size))
         }
         adapter.submit(cells)
+        fitCellsToAvailableSpace(cells.size)
+    }
+
+    /** 화면에 남는 세로 공간을 그대로 칸 크기로 써서, 달마다 줄 수가 달라도 항상 꽉 차게 만든다. */
+    private fun fitCellsToAvailableSpace(cellCount: Int) {
+        val rowCount = ceil(cellCount / COLUMN_COUNT.toDouble()).toInt().coerceAtLeast(1)
+        binding.recyclerCalendar.post {
+            val height = binding.recyclerCalendar.height
+            if (height <= 0) return@post
+            adapter.cellHeightPx = height / rowCount
+        }
+    }
+
+    private fun showMonthPicker() {
+        val years = allPhotos.map { it.dateTaken.year }.toMutableSet().apply { add(currentMonth.year) }
+        val minYear = (years.minOrNull() ?: currentMonth.year).coerceAtMost(currentMonth.year)
+        val maxYear = (years.maxOrNull() ?: currentMonth.year).coerceAtLeast(currentMonth.year)
+
+        val dialogBinding = DialogMonthPickerBinding.inflate(LayoutInflater.from(this))
+        dialogBinding.yearPicker.minValue = minYear
+        dialogBinding.yearPicker.maxValue = maxYear
+        dialogBinding.yearPicker.value = currentMonth.year
+        dialogBinding.monthPicker.minValue = 1
+        dialogBinding.monthPicker.maxValue = 12
+        dialogBinding.monthPicker.value = currentMonth.monthValue
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.pick_year_month)
+            .setView(dialogBinding.root)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
+                currentMonth = YearMonth.of(dialogBinding.yearPicker.value, dialogBinding.monthPicker.value)
+                renderMonth()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     private fun openDayDetail(date: LocalDate) {

@@ -17,6 +17,14 @@ class CalendarDayAdapter(
 
     private val items = mutableListOf<CalendarCell>()
 
+    /** 화면에 꽉 차도록 계산한 칸 높이(px). 0이면 XML의 wrap_content 그대로 둔다. */
+    var cellHeightPx: Int = 0
+        set(value) {
+            if (field == value) return
+            field = value
+            notifyDataSetChanged()
+        }
+
     fun submit(cells: List<CalendarCell>) {
         items.clear()
         items.addAll(cells)
@@ -36,6 +44,9 @@ class CalendarDayAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(cell: CalendarCell) {
+            if (cellHeightPx > 0 && binding.root.layoutParams.height != cellHeightPx) {
+                binding.root.layoutParams = binding.root.layoutParams.apply { height = cellHeightPx }
+            }
             when (cell) {
                 is CalendarCell.Blank -> {
                     binding.textDate.text = ""

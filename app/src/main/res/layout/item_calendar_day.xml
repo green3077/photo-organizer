@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<com.green3077.photoorganizer.ui.SquareFrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -18,7 +18,7 @@
     <View
         android:id="@+id/scrimTop"
         android:layout_width="match_parent"
-        android:layout_height="18dp"
+        android:layout_height="22dp"
         android:layout_gravity="top"
         android:background="@drawable/scrim_top"
         android:visibility="gone" />
@@ -28,14 +28,15 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|start"
-        android:layout_margin="3dp"
+        android:layout_margin="4dp"
         android:textColor="@color/text_secondary"
-        android:textSize="11sp" />
+        android:textSize="13sp"
+        android:textStyle="bold" />
 
     <View
         android:id="@+id/scrimBottom"
         android:layout_width="match_parent"
-        android:layout_height="16dp"
+        android:layout_height="20dp"
         android:layout_gravity="bottom"
         android:background="@drawable/scrim_bottom"
         android:visibility="gone" />
@@ -45,9 +46,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:layout_margin="3dp"
+        android:layout_margin="4dp"
         android:textColor="@color/white"
-        android:textSize="9sp"
+        android:textSize="11sp"
         android:visibility="gone" />
 
-</com.green3077.photoorganizer.ui.SquareFrameLayout>
+</FrameLayout>
