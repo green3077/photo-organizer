@@ -11,8 +11,8 @@ android {
         applicationId = "com.green3077.photoorganizer"
         minSdk = 30
         targetSdk = 34
-        versionCode = 8
-        versionName = "1.7"
+        versionCode = 9
+        versionName = "1.8"
     }
 
     signingConfigs {

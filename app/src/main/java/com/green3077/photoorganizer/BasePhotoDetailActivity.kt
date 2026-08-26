@@ -146,10 +146,10 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
     private fun renderYearFilterChips(years: List<Int>) {
         val group = binding.yearFilterGroup
         if (years.size <= 1) {
-            group.visibility = View.GONE
+            binding.yearFilterScroll.visibility = View.GONE
             return
         }
-        group.visibility = View.VISIBLE
+        binding.yearFilterScroll.visibility = View.VISIBLE
         group.removeAllViews()
 
         fun addChip(label: String, year: Int?) {

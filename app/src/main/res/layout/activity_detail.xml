@@ -24,17 +24,27 @@
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- 이 월/일이 여러 연도에 걸쳐 있을 때만 나타나는 연도 필터 -->
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/yearFilterGroup"
+        <!-- 이 월/일이 여러 연도에 걸쳐 있을 때만 나타나는 연도 필터.
+             칩이 화면 너비를 넘어가면 가로로 스크롤해서 나머지 연도도 누를 수 있어야 한다. -->
+        <HorizontalScrollView
+            android:id="@+id/yearFilterScroll"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:paddingHorizontal="12dp"
-            android:paddingVertical="8dp"
-            android:visibility="gone"
-            app:chipSpacingHorizontal="6dp"
-            app:singleLine="true"
-            app:singleSelection="true" />
+            android:clipToPadding="false"
+            android:scrollbars="none"
+            android:visibility="gone">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/yearFilterGroup"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="12dp"
+                android:paddingVertical="8dp"
+                app:chipSpacingHorizontal="6dp"
+                app:singleLine="true"
+                app:singleSelection="true" />
+
+        </HorizontalScrollView>
 
         <FrameLayout
             android:layout_width="match_parent"
