@@ -26,6 +26,7 @@ import com.green3077.photoorganizer.databinding.ActivityChallengeBinding
 import com.green3077.photoorganizer.model.Photo
 import com.green3077.photoorganizer.notification.WorkScheduler
 import com.green3077.photoorganizer.ui.DetailListAdapter
+import com.green3077.photoorganizer.ui.DragSelectTouchListener
 import com.green3077.photoorganizer.ui.PhotoViewerHolder
 import com.green3077.photoorganizer.util.DateFormat
 import kotlinx.coroutines.launch
@@ -96,7 +97,7 @@ class ChallengeActivity : AppCompatActivity() {
         binding.btnMove.setOnClickListener { confirmMove() }
 
         adapter = DetailListAdapter(
-            isSelected = { selectedIds.contains(it) },
+            isSelected = ::isPhotoSelected,
             onPhotoClick = ::onPhotoClick,
             onToggleSelect = ::toggleSelection
         )
@@ -108,6 +109,13 @@ class ChallengeActivity : AppCompatActivity() {
         }
         binding.recyclerPhotos.layoutManager = layoutManager
         binding.recyclerPhotos.adapter = adapter
+
+        DragSelectTouchListener(
+            recyclerView = binding.recyclerPhotos,
+            isSelectablePosition = { position -> !adapter.isHeaderAt(position) },
+            isSelected = { position -> adapter.photoAt(position)?.let { isPhotoSelected(it.id) } == true },
+            setSelected = { position, selected -> adapter.photoAt(position)?.let { setSelected(it, selected) } }
+        ).attach()
     }
 
     override fun onStart() {
@@ -257,9 +265,15 @@ class ChallengeActivity : AppCompatActivity() {
         )
     }
 
-    private fun toggleSelection(photo: Photo) {
-        if (!selectedIds.remove(photo.id)) selectedIds.add(photo.id)
+    private fun isPhotoSelected(id: Long): Boolean = selectedIds.contains(id)
+
+    private fun setSelected(photo: Photo, selected: Boolean) {
+        if (selected) selectedIds.add(photo.id) else selectedIds.remove(photo.id)
         adapter.refreshSelectionState()
+    }
+
+    private fun toggleSelection(photo: Photo) {
+        setSelected(photo, !isPhotoSelected(photo.id))
     }
 
     private fun selectedUris(): List<Uri> =

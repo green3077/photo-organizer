@@ -17,8 +17,8 @@ sealed class DetailRow {
 
 /**
  * 연도별(날짜 상세)이든 날짜별(장소 상세)이든, 문자열 라벨을 키로 하는 섹션 목록을 그린다.
- * 모든 사진에 체크박스를 항상 보여줘서, 길게 누르는 숨은 제스처를 몰라도
- * 체크박스를 탭하는 것만으로 바로 선택할 수 있게 한다.
+ * 모든 사진에 체크박스를 항상 보여줘서 탭 한 번으로 선택할 수 있고, 길게 눌러 손을 떼지
+ * 않은 채 드래그하면 지나가는 사진들이 잇달아 선택된다(DragSelectTouchListener가 처리).
  */
 class DetailListAdapter(
     private val isSelected: (Long) -> Boolean,
@@ -42,6 +42,8 @@ class DetailListAdapter(
     }
 
     fun isHeaderAt(position: Int): Boolean = items[position] is DetailRow.SectionHeader
+
+    fun photoAt(position: Int): Photo? = (items.getOrNull(position) as? DetailRow.PhotoRow)?.photo
 
     override fun getItemViewType(position: Int) = when (items[position]) {
         is DetailRow.SectionHeader -> TYPE_HEADER
@@ -86,10 +88,6 @@ class DetailListAdapter(
             binding.checkIcon.setOnClickListener { onToggleSelect(photo) }
             binding.root.setOnClickListener {
                 if (isSelected(photo.id) || hasAnySelected()) onToggleSelect(photo) else onPhotoClick(photo)
-            }
-            binding.root.setOnLongClickListener {
-                onToggleSelect(photo)
-                true
             }
         }
 
