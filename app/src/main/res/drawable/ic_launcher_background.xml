@@ -1,19 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:aapt="http://schemas.android.com/aapt"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path android:pathData="M0,0h108v108h-108z">
-        <aapt:attr name="android:fillColor">
-            <gradient
-                android:type="linear"
-                android:startX="0"
-                android:startY="0"
-                android:endX="108"
-                android:endY="108"
-                android:startColor="#6C63FF"
-                android:endColor="#2A3EB1" />
-        </aapt:attr>
-    </path>
+    <!-- 새 아이콘(ic_launcher_foreground)이 108dp를 꽉 채우는 불투명 이미지라 실제로는
+         거의 보이지 않지만, 일부 런처의 마스크 애니메이션에서 살짝 비칠 때를 대비한 배경색. -->
+    <path
+        android:fillColor="#EAF2FB"
+        android:pathData="M0,0h108v108h-108z" />
 </vector>
