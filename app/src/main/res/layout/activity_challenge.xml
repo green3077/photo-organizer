@@ -13,6 +13,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/transparent"
             android:title="@string/title_challenge"
             app:navigationIcon="@drawable/ic_back" />
 

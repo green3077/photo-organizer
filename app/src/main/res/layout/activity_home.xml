@@ -7,12 +7,14 @@
 
     <com.google.android.material.appbar.AppBarLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        app:elevation="0dp">
 
         <com.google.android.material.appbar.MaterialToolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            android:background="@android:color/transparent"
             android:title="@string/app_name" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -43,29 +45,33 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
             android:checkable="true"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
+            app:cardBackgroundColor="@android:color/transparent"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="6dp"
             app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/bg_gradient_challenge"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="28dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/home_challenge_menu"
-                    android:textSize="20sp"
+                    android:textColor="@color/white"
+                    android:textSize="22sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
+                    android:alpha="0.85"
                     android:text="@string/home_challenge_menu_subtitle"
-                    android:textColor="@color/text_secondary"
+                    android:textColor="@color/white"
                     android:textSize="14sp" />
 
             </LinearLayout>
@@ -77,29 +83,33 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:checkable="true"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="2dp"
+            app:cardBackgroundColor="@android:color/transparent"
+            app:cardCornerRadius="20dp"
+            app:cardElevation="6dp"
             app:strokeWidth="0dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:background="@drawable/bg_gradient_date"
                 android:orientation="vertical"
-                android:padding="24dp">
+                android:padding="28dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/home_date_menu"
-                    android:textSize="20sp"
+                    android:textColor="@color/white"
+                    android:textSize="22sp"
                     android:textStyle="bold" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
+                    android:alpha="0.85"
                     android:text="@string/home_date_menu_subtitle"
-                    android:textColor="@color/text_secondary"
+                    android:textColor="@color/white"
                     android:textSize="14sp" />
 
             </LinearLayout>

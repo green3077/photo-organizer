@@ -1,13 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary">#3D5AFE</color>
-    <color name="primary_dark">#0031CA</color>
-    <color name="background">#FFFFFF</color>
+    <color name="primary">#5B6EF5</color>
+    <color name="primary_dark">#2A3EB1</color>
+    <color name="background">#F4F5FB</color>
     <color name="text_secondary">#757575</color>
     <color name="text_primary">#212121</color>
     <color name="thumbnail_placeholder">#E0E0E0</color>
-    <color name="selection_overlay">#803D5AFE</color>
+    <color name="selection_overlay">#805B6EF5</color>
     <color name="viewer_background">#000000</color>
     <color name="viewer_toolbar_background">#CC000000</color>
     <color name="white">#FFFFFF</color>
+
+    <!-- 홈 화면 메뉴 카드 그라디언트 -->
+    <color name="card_challenge_start">#6C63FF</color>
+    <color name="card_challenge_end">#3F3D9E</color>
+    <color name="card_date_start">#34D1BF</color>
+    <color name="card_date_end">#1E9E90</color>
 </resources>
