@@ -30,9 +30,28 @@
         </activity>
 
         <activity
-            android:name=".MainActivity"
+            android:name=".DateOrganizeChooserActivity"
             android:exported="false"
             android:label="@string/title_date_organize" />
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:label="@string/title_day_organize" />
+
+        <activity
+            android:name=".MonthActivity"
+            android:exported="false"
+            android:label="@string/title_month_organize" />
+
+        <activity
+            android:name=".MonthDetailActivity"
+            android:exported="false" />
+
+        <activity
+            android:name=".LocationActivity"
+            android:exported="false"
+            android:label="@string/title_location_organize" />
 
         <activity
             android:name=".DetailActivity"

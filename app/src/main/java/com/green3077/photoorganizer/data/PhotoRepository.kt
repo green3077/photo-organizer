@@ -5,6 +5,7 @@ import android.content.Context
 import android.net.Uri
 import android.provider.MediaStore
 import com.green3077.photoorganizer.model.MemoryGroup
+import com.green3077.photoorganizer.model.MonthGroup
 import com.green3077.photoorganizer.model.Photo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -74,6 +75,24 @@ class PhotoRepository(private val context: Context) {
     fun photosForDay(photos: List<Photo>, day: Int): Map<LocalDate, List<Photo>> {
         return photos
             .filter { it.dateTaken.dayOfMonth == day }
+            .groupBy { it.dateTaken }
+            .toSortedMap(compareByDescending { it })
+    }
+
+    /** 연도에 상관없이 "월(1~12월)" 단위로 사진을 모은다. 사진이 있는 달만 1월부터 순서대로. */
+    fun buildMonthGroups(photos: List<Photo>): List<MonthGroup> {
+        return photos
+            .groupBy { it.dateTaken.monthValue }
+            .map { (month, group) ->
+                MonthGroup(month, group.groupBy { it.dateTaken.year }.toSortedMap(compareByDescending { it }))
+            }
+            .sortedBy { it.month }
+    }
+
+    /** 연도에 상관없이 그 "월"에 찍힌 모든 사진을, 실제 촬영 날짜별로 묶어서 돌려준다. */
+    fun photosForMonth(photos: List<Photo>, month: Int): Map<LocalDate, List<Photo>> {
+        return photos
+            .filter { it.dateTaken.monthValue == month }
             .groupBy { it.dateTaken }
             .toSortedMap(compareByDescending { it })
     }

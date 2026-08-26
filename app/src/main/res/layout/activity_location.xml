@@ -14,8 +14,7 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/transparent"
-            android:title="@string/title_day_organize"
-            app:menu="@menu/menu_main"
+            android:title="@string/title_location_organize"
             app:navigationIcon="@drawable/ic_back" />
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -82,11 +81,10 @@
                 android:visibility="gone">
 
                 <TextView
-                    android:id="@+id/permissionText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:gravity="center"
-                    android:text="@string/permission_rationale"
+                    android:text="@string/location_permission_rationale"
                     android:textSize="16sp" />
 
                 <com.google.android.material.button.MaterialButton

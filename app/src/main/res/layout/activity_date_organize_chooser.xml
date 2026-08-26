@@ -15,37 +15,21 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/transparent"
-            android:title="@string/app_name" />
+            android:title="@string/title_date_organize"
+            app:navigationIcon="@drawable/ic_back" />
 
     </com.google.android.material.appbar.AppBarLayout>
-
-    <ImageButton
-        android:id="@+id/btnSettings"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_gravity="top|end"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="4dp"
-        android:background="?attr/selectableItemBackgroundBorderless"
-        android:padding="12dp"
-        android:src="@drawable/ic_settings"
-        android:contentDescription="@string/title_settings" />
-
-    <androidx.core.widget.NestedScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:orientation="vertical"
-        android:padding="24dp">
+        android:padding="24dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardDateOrganize"
+            android:id="@+id/cardDay"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginBottom="16dp"
@@ -65,7 +49,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/home_date_menu"
+                    android:text="@string/chooser_day_menu"
                     android:textColor="@color/white"
                     android:textSize="22sp"
                     android:textStyle="bold" />
@@ -75,7 +59,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:alpha="0.85"
-                    android:text="@string/home_date_menu_subtitle"
+                    android:text="@string/chooser_day_menu_subtitle"
                     android:textColor="@color/white"
                     android:textSize="14sp" />
 
@@ -84,46 +68,7 @@
         </com.google.android.material.card.MaterialCardView>
 
         <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardCalendar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="16dp"
-            android:checkable="true"
-            app:cardBackgroundColor="@android:color/transparent"
-            app:cardCornerRadius="20dp"
-            app:cardElevation="6dp"
-            app:strokeWidth="0dp">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/bg_gradient_calendar"
-                android:orientation="vertical"
-                android:padding="28dp">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/home_calendar_menu"
-                    android:textColor="@color/white"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="6dp"
-                    android:alpha="0.85"
-                    android:text="@string/home_calendar_menu_subtitle"
-                    android:textColor="@color/white"
-                    android:textSize="14sp" />
-
-            </LinearLayout>
-
-        </com.google.android.material.card.MaterialCardView>
-
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/cardLocation"
+            android:id="@+id/cardMonth"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:checkable="true"
@@ -135,14 +80,14 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/bg_gradient_location"
+                android:background="@drawable/bg_gradient_month"
                 android:orientation="vertical"
                 android:padding="28dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="@string/home_location_menu"
+                    android:text="@string/chooser_month_menu"
                     android:textColor="@color/white"
                     android:textSize="22sp"
                     android:textStyle="bold" />
@@ -152,7 +97,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
                     android:alpha="0.85"
-                    android:text="@string/home_location_menu_subtitle"
+                    android:text="@string/chooser_month_menu_subtitle"
                     android:textColor="@color/white"
                     android:textSize="14sp" />
 
@@ -161,16 +106,5 @@
         </com.google.android.material.card.MaterialCardView>
 
     </LinearLayout>
-
-    </androidx.core.widget.NestedScrollView>
-
-    <com.google.android.gms.ads.AdView
-        android:id="@+id/adView"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="8dp"
-        app:adSize="BANNER"
-        app:adUnitId="ca-app-pub-1496691223826686/2115727091" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

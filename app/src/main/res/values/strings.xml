@@ -2,19 +2,22 @@
 <resources>
     <string name="app_name">사진정리</string>
     <string name="title_detail">날짜별 사진</string>
-    <string name="title_date_organize">일자별 정리</string>
+    <string name="title_date_organize">날짜별 정리</string>
+    <string name="title_day_organize">일별 정리</string>
+    <string name="title_month_organize">월별 정리</string>
+    <string name="title_location_organize">나라별 정리</string>
     <string name="pick_date">날짜 선택</string>
     <string name="delete">삭제</string>
     <string name="allow_access">사진 접근 허용하기</string>
     <string name="permission_rationale">매달 같은 날짜에 찍은 사진을 모아 보려면\n사진 접근 권한이 필요해요.</string>
     <string name="empty_recurring_title">아직 같은 날짜에 두 번 이상\n찍힌 사진이 없어요.</string>
     <string name="empty_recurring_subtitle">오른쪽 위 달력 아이콘으로 날짜를 직접 선택해 볼 수 있어요.</string>
+    <string name="empty_month_title">아직 사진이 없어요.</string>
+    <string name="empty_month_subtitle">사진을 찍으면 촬영한 달에 자동으로 모여요.</string>
     <string name="empty_detail">이 날짜에 찍은 사진이 없어요.</string>
     <string name="selected_count">%1$d장 선택됨</string>
     <string name="streak_banner">🔥 %1$d일 연속 정리 중!</string>
 
-    <string name="tab_by_date">날짜별</string>
-    <string name="tab_by_location">나라별</string>
     <string name="location_permission_rationale">해외에서 찍은 사진을 나라별로 모아 보려면\n위치 정보 접근 권한이 필요해요.</string>
     <string name="empty_location_title">해외에서 찍은 사진이 없어요.</string>
     <string name="empty_location_subtitle">GPS를 켠 상태로 해외에서 찍은 사진만 나라별로 모여요.</string>
@@ -47,8 +50,8 @@
     <string name="select_photos_first">사진을 먼저 선택해주세요.</string>
     <string name="year_filter_all">전체</string>
 
-    <string name="home_date_menu">일자별 정리</string>
-    <string name="home_date_menu_subtitle">반복되는 날짜 · 연도별 · 나라별</string>
+    <string name="home_date_menu">날짜별 정리</string>
+    <string name="home_date_menu_subtitle">일별 · 월별로 골라서 정리해요</string>
 
     <string name="home_calendar_menu">달력으로 보기</string>
     <string name="home_calendar_menu_subtitle">날짜 칸에서 그날 사진을 바로 확인</string>
@@ -57,6 +60,14 @@
     <string name="prev_month">이전 달</string>
     <string name="next_month">다음 달</string>
     <string name="pick_year_month">연도·월 선택</string>
+
+    <string name="home_location_menu">나라별 정리</string>
+    <string name="home_location_menu_subtitle">해외에서 찍은 사진을 나라별로 모아서 봐요</string>
+
+    <string name="chooser_day_menu">일별 정리</string>
+    <string name="chooser_day_menu_subtitle">반복되는 날짜만 모아서 봐요</string>
+    <string name="chooser_month_menu">월별 정리</string>
+    <string name="chooser_month_menu_subtitle">월별로 모든 사진을 모아서 봐요</string>
 
     <string name="toggle_grid_view">바둑판 보기</string>
     <string name="toggle_list_view">목록 보기</string>

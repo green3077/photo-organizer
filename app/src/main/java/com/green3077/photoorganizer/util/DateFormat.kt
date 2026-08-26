@@ -8,6 +8,8 @@ object DateFormat {
 
     fun dayLabel(day: Int): String = "${day}일"
 
+    fun monthLabel(month: Int): String = "${month}월"
+
     fun fullDateLabel(date: LocalDate): String = "${date.year}년 ${date.monthValue}월 ${date.dayOfMonth}일"
 
     fun fileSize(bytes: Long): String = when {

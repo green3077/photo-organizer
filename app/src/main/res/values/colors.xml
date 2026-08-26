@@ -16,4 +16,8 @@
     <color name="card_calendar_end">#3F3D9E</color>
     <color name="card_date_start">#34D1BF</color>
     <color name="card_date_end">#1E9E90</color>
+    <color name="card_month_start">#FF6E9E</color>
+    <color name="card_month_end">#C2185B</color>
+    <color name="card_location_start">#FFB74D</color>
+    <color name="card_location_end">#EF6C00</color>
 </resources>

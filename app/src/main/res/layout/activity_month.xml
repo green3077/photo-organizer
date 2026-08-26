@@ -14,8 +14,8 @@
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
             android:background="@android:color/transparent"
-            android:title="@string/title_day_organize"
-            app:menu="@menu/menu_main"
+            android:title="@string/title_month_organize"
+            app:menu="@menu/menu_month"
             app:navigationIcon="@drawable/ic_back" />
 
     </com.google.android.material.appbar.AppBarLayout>
