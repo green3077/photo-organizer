@@ -66,11 +66,9 @@
             android:exported="false"
             android:label="@string/title_settings" />
 
-        <!-- 지금은 구글 공식 테스트 앱 ID. AdMob 계정 만들면 진짜 앱 ID로 교체해야 함
-             (안 바꾸면 광고는 뜨지만 "테스트 광고" 표시만 나오고 수익은 안 잡힘). -->
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-3940256099942544~3347511713" />
+            android:value="ca-app-pub-1496691223826686~3109244563" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
