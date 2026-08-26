@@ -5,11 +5,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
-import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -25,9 +26,13 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 /**
- * "사진을 날짜별 섹션으로 묶어 그리드로 보여주고, 길게 눌러 선택한 뒤 삭제/공유/이동한다"는
+ * "사진을 날짜별 섹션으로 묶어 그리드로 보여주고, 선택한 뒤 삭제/공유/이동한다"는
  * DetailActivity / LocationDetailActivity / YearDetailActivity 공통 골격.
  * 무엇을(어떤 조건으로) 불러올지, 섹션 라벨을 뭐라 붙일지만 하위 클래스가 정한다.
+ *
+ * 툴바의 "선택" 버튼(항상 보임)을 누르거나 사진을 길게 누르면 선택 모드로 들어가고,
+ * 그때부터는 사진을 탭할 때마다 체크박스가 토글된다 — 길게 누르는 제스처를 몰라도
+ * 바로 발견할 수 있게 하기 위함.
  */
 abstract class BasePhotoDetailActivity : AppCompatActivity() {
 
@@ -36,6 +41,7 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
     protected val repository by lazy { PhotoRepository(this) }
     private var photosByDate: Map<LocalDate, List<Photo>> = emptyMap()
     private val selectedIds = mutableSetOf<Long>()
+    private var selectionMode = false
     private var pendingMoveUris: List<Uri> = emptyList()
     private var pendingMoveFolder: String = ""
 
@@ -43,7 +49,7 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 StreakTracker.recordOrganizedToday(this)
-                selectedIds.clear()
+                exitSelectionMode()
                 loadPhotos()
             }
         }
@@ -54,7 +60,7 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
             if (result.resultCode == RESULT_OK) {
                 mover.applyMove(pendingMoveUris, pendingMoveFolder)
                 StreakTracker.recordOrganizedToday(this)
-                selectedIds.clear()
+                exitSelectionMode()
                 loadPhotos()
             }
         }
@@ -78,9 +84,15 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         binding.toolbar.title = screenTitle()
-        binding.toolbar.setNavigationOnClickListener { finish() }
+        binding.toolbar.setNavigationOnClickListener {
+            if (selectionMode) exitSelectionMode() else finish()
+        }
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
+                R.id.action_select -> {
+                    enterSelectionMode()
+                    true
+                }
                 R.id.action_delete -> {
                     confirmDelete()
                     true
@@ -95,6 +107,9 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
                 }
                 else -> false
             }
+        }
+        onBackPressedDispatcher.addCallback(this) {
+            if (selectionMode) exitSelectionMode() else finish()
         }
 
         adapter = DetailListAdapter(
@@ -131,7 +146,7 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
     }
 
     private fun onPhotoClick(photo: Photo) {
-        if (selectedIds.isNotEmpty()) {
+        if (selectionMode) {
             toggleSelection(photo)
             return
         }
@@ -147,35 +162,55 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
     }
 
     private fun toggleSelection(photo: Photo) {
+        if (!selectionMode) {
+            selectionMode = true
+            adapter.setSelectionMode(true)
+            binding.toolbar.navigationIcon = ContextCompat.getDrawable(this, R.drawable.ic_close)
+        }
         if (!selectedIds.remove(photo.id)) selectedIds.add(photo.id)
         adapter.notifyDataSetChanged()
         updateSelectionUi()
     }
 
+    private fun enterSelectionMode() {
+        if (selectionMode) return
+        selectionMode = true
+        adapter.setSelectionMode(true)
+        binding.toolbar.navigationIcon = ContextCompat.getDrawable(this, R.drawable.ic_close)
+        updateSelectionUi()
+    }
+
+    private fun exitSelectionMode() {
+        selectionMode = false
+        selectedIds.clear()
+        adapter.setSelectionMode(false)
+        binding.toolbar.navigationIcon = ContextCompat.getDrawable(this, R.drawable.ic_back)
+        updateSelectionUi()
+    }
+
     private fun updateSelectionUi() {
         val hasSelection = selectedIds.isNotEmpty()
-        binding.toolbar.title = if (hasSelection) getString(R.string.selected_count, selectedIds.size) else screenTitle()
+        binding.toolbar.menu.findItem(R.id.action_select)?.isVisible = !selectionMode
+        binding.toolbar.menu.findItem(R.id.action_delete)?.isVisible = selectionMode && hasSelection
+        binding.toolbar.menu.findItem(R.id.action_share)?.isVisible = selectionMode && hasSelection
+        binding.toolbar.menu.findItem(R.id.action_move)?.isVisible = selectionMode && hasSelection
+        binding.toolbar.title = when {
+            hasSelection -> getString(R.string.selected_count, selectedIds.size)
+            selectionMode -> getString(R.string.select_hint)
+            else -> screenTitle()
+        }
     }
 
     private fun selectedUris(): List<Uri> =
         photosByDate.values.flatten().filter { selectedIds.contains(it.id) }.map { it.uri }
 
-    private fun requireSelection(): List<Uri>? {
-        val uris = selectedUris()
-        if (uris.isEmpty()) {
-            Toast.makeText(this, R.string.select_photos_first, Toast.LENGTH_SHORT).show()
-            return null
-        }
-        return uris
-    }
-
     private fun confirmDelete() {
-        val uris = requireSelection() ?: return
-        deleter.requestDelete(uris)
+        deleter.requestDelete(selectedUris())
     }
 
     private fun confirmShare() {
-        val uris = requireSelection() ?: return
+        val uris = selectedUris()
+        if (uris.isEmpty()) return
         val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
             type = "image/*"
             putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(uris))
@@ -185,7 +220,8 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
     }
 
     private fun confirmMove() {
-        val uris = requireSelection() ?: return
+        val uris = selectedUris()
+        if (uris.isEmpty()) return
         val input = EditText(this).apply {
             setText(PhotoMover.DEFAULT_FOLDER)
             setSelection(text.length)

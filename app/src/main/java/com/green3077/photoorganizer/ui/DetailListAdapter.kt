@@ -5,6 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import coil.load
+import com.green3077.photoorganizer.R
 import com.green3077.photoorganizer.databinding.ItemPhotoBinding
 import com.green3077.photoorganizer.databinding.ItemSectionHeaderBinding
 import com.green3077.photoorganizer.model.Photo
@@ -16,6 +17,8 @@ sealed class DetailRow {
 
 /**
  * 연도별(날짜 상세)이든 날짜별(장소 상세)이든, 문자열 라벨을 키로 하는 섹션 목록을 그린다.
+ * 선택 모드일 때는 모든 사진에 체크박스를 보여줘서 "길게 눌러야 선택된다"는 걸
+ * 몰라도 바로 탭으로 고를 수 있게 한다.
  */
 class DetailListAdapter(
     private val isSelected: (Long) -> Boolean,
@@ -24,6 +27,7 @@ class DetailListAdapter(
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val items = mutableListOf<DetailRow>()
+    private var selectionMode = false
 
     fun submit(sections: Map<String, List<Photo>>) {
         items.clear()
@@ -31,6 +35,12 @@ class DetailListAdapter(
             items.add(DetailRow.SectionHeader(label, photos.size))
             photos.forEach { items.add(DetailRow.PhotoRow(it)) }
         }
+        notifyDataSetChanged()
+    }
+
+    fun setSelectionMode(enabled: Boolean) {
+        if (selectionMode == enabled) return
+        selectionMode = enabled
         notifyDataSetChanged()
     }
 
@@ -71,7 +81,16 @@ class DetailListAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bind(photo: Photo) {
             binding.image.load(photo.uri) { crossfade(true) }
-            binding.checkOverlay.visibility = if (isSelected(photo.id)) View.VISIBLE else View.GONE
+            val selected = isSelected(photo.id)
+            binding.checkOverlay.visibility = if (selected) View.VISIBLE else View.GONE
+            if (selectionMode) {
+                binding.checkIcon.visibility = View.VISIBLE
+                binding.checkIcon.setImageResource(
+                    if (selected) R.drawable.ic_check_circle_filled else R.drawable.ic_check_circle_outline
+                )
+            } else {
+                binding.checkIcon.visibility = View.GONE
+            }
             binding.root.setOnClickListener { onPhotoClick(photo) }
             binding.root.setOnLongClickListener {
                 onPhotoLongClick(photo)

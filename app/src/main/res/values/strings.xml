@@ -36,5 +36,7 @@
     <string name="move_confirm">이동</string>
     <string name="move_done">%1$d장을 \'%2$s\' 폴더로 옮겼어요.</string>
     <string name="default_move_folder">정리한사진</string>
-    <string name="select_photos_first">사진을 길게 눌러 먼저 선택해주세요.</string>
+    <string name="select_photos_first">사진을 먼저 선택해주세요.</string>
+    <string name="select">선택</string>
+    <string name="select_hint">정리할 사진을 선택하세요</string>
 </resources>

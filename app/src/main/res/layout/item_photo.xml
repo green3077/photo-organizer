@@ -20,4 +20,13 @@
         android:background="@color/selection_overlay"
         android:visibility="gone" />
 
+    <ImageView
+        android:id="@+id/checkIcon"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_gravity="top|end"
+        android:layout_margin="4dp"
+        android:visibility="gone"
+        tools:ignore="ContentDescription" />
+
 </FrameLayout>
