@@ -9,8 +9,6 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.green3077.photoorganizer.data.ChallengeSettings
 import com.green3077.photoorganizer.data.PhotoRepository
-import java.time.LocalDate
-import java.time.MonthDay
 
 class DailyMemoryWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
 
@@ -28,15 +26,14 @@ class DailyMemoryWorker(context: Context, params: WorkerParameters) : CoroutineW
             return Result.success()
         }
 
-        val repository = PhotoRepository(applicationContext)
-        val today = MonthDay.now()
-        val allPhotos = repository.loadAllPhotos()
-        val pastYearPhotos = repository.photosForMonthDay(allPhotos, today)
-            .filterKeys { it != LocalDate.now().year }
+        val targetDate = ChallengeSettings.currentChallengeDate(applicationContext) ?: return Result.success()
 
-        if (pastYearPhotos.isNotEmpty()) {
-            val totalCount = pastYearPhotos.values.sumOf { it.size }
-            NotificationHelper.showDailyChallenge(applicationContext, today, pastYearPhotos.size, totalCount)
+        val repository = PhotoRepository(applicationContext)
+        val allPhotos = repository.loadAllPhotos()
+        val dayPhotos = repository.photosForExactDate(allPhotos, targetDate)
+
+        if (dayPhotos.isNotEmpty()) {
+            NotificationHelper.showDailyChallenge(applicationContext, targetDate, dayPhotos.size)
         }
         return Result.success()
     }

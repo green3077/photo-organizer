@@ -11,9 +11,4 @@
         android:icon="@drawable/ic_year"
         android:title="@string/pick_year"
         app:showAsAction="always" />
-    <item
-        android:id="@+id/action_settings"
-        android:icon="@drawable/ic_settings"
-        android:title="@string/title_settings"
-        app:showAsAction="always" />
 </menu>

@@ -13,8 +13,9 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
-            android:title="@string/app_name"
-            app:menu="@menu/menu_main" />
+            android:title="@string/title_date_organize"
+            app:menu="@menu/menu_main"
+            app:navigationIcon="@drawable/ic_back" />
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayout"

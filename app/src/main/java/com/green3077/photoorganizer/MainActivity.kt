@@ -65,6 +65,7 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerGroups.layoutManager = LinearLayoutManager(this)
         binding.recyclerGroups.adapter = groupAdapter
 
+        binding.toolbar.setNavigationOnClickListener { finish() }
         binding.toolbar.setOnMenuItemClickListener { item ->
             when (item.itemId) {
                 R.id.action_pick_date -> {
@@ -73,10 +74,6 @@ class MainActivity : AppCompatActivity() {
                 }
                 R.id.action_pick_year -> {
                     showYearPicker()
-                    true
-                }
-                R.id.action_settings -> {
-                    startActivity(Intent(this, SettingsActivity::class.java))
                     true
                 }
                 else -> false

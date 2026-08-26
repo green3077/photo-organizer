@@ -11,9 +11,10 @@ import android.os.Build
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.green3077.photoorganizer.DetailActivity
+import com.green3077.photoorganizer.ChallengeActivity
 import com.green3077.photoorganizer.R
-import java.time.MonthDay
+import com.green3077.photoorganizer.util.DateFormat
+import java.time.LocalDate
 
 object NotificationHelper {
     private const val CHANNEL_ID = "daily_memory_challenge"
@@ -30,7 +31,7 @@ object NotificationHelper {
         }
     }
 
-    fun showDailyChallenge(context: Context, monthDay: MonthDay, yearCount: Int, photoCount: Int) {
+    fun showDailyChallenge(context: Context, targetDate: LocalDate, photoCount: Int) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ActivityCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) !=
             PackageManager.PERMISSION_GRANTED
@@ -40,9 +41,7 @@ object NotificationHelper {
 
         ensureChannel(context)
 
-        val intent = Intent(context, DetailActivity::class.java).apply {
-            putExtra(DetailActivity.EXTRA_MONTH, monthDay.monthValue)
-            putExtra(DetailActivity.EXTRA_DAY, monthDay.dayOfMonth)
+        val intent = Intent(context, ChallengeActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
         }
         val pendingIntent = PendingIntent.getActivity(
@@ -53,7 +52,9 @@ object NotificationHelper {
         val notification = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_notification)
             .setContentTitle(context.getString(R.string.notification_title))
-            .setContentText(context.getString(R.string.notification_body, yearCount, photoCount))
+            .setContentText(
+                context.getString(R.string.notification_body, DateFormat.fullDateLabel(targetDate), photoCount)
+            )
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
             .build()

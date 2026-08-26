@@ -10,26 +10,41 @@ import com.green3077.photoorganizer.model.PhotoLocation
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Locale
+import kotlin.math.roundToInt
 
+/**
+ * "장소별"(반경 500m 클러스터)이 아니라 "나라별"로 묶는다. 사진마다, 심지어 클러스터마다
+ * 지오코딩을 부르면 여행 사진이 많을 때 너무 오래 걸려서, 좌표를 약 1도(~111km) 격자로
+ * 뭉쳐 그 격자당 지오코딩을 딱 한 번만 호출한 뒤 나라 단위로 합친다. 기기 로케일의
+ * 국가(=집)는 "해외 사진만" 보려는 목적에 맞게 제외한다.
+ */
 class LocationRepository(private val context: Context) {
 
-    /**
-     * ACCESS_MEDIA_LOCATION 권한이 있어야 원본 EXIF GPS 좌표를 읽을 수 있다.
-     * 좌표가 있는 사진만 가까운 것끼리 묶어 장소 그룹으로 반환한다.
-     */
     suspend fun loadLocationGroups(photos: List<Photo>): List<LocationGroup> = withContext(Dispatchers.IO) {
+        val homeCountryCode = Locale.getDefault().country
         val located = photos.mapNotNull { photo -> readLocation(photo)?.let { photo to it } }
-        LocationClusterer.cluster(located)
-            .map { cluster ->
-                LocationGroup(
-                    centerLat = cluster.lat,
-                    centerLon = cluster.lon,
-                    placeName = reverseGeocode(cluster.lat, cluster.lon),
-                    photos = cluster.items.sortedByDescending { it.dateTaken }
-                )
-            }
-            .sortedByDescending { it.photoCount }
+        val byGridCell = located.groupBy { (_, loc) -> gridCellOf(loc) }
+
+        val photosByCountry = mutableMapOf<String, MutableList<Photo>>()
+        val countryNames = mutableMapOf<String, String>()
+
+        for ((cell, entries) in byGridCell) {
+            val (code, name) = reverseGeocodeCountry(cell) ?: continue
+            if (homeCountryCode.isNotBlank() && code.equals(homeCountryCode, ignoreCase = true)) continue
+            photosByCountry.getOrPut(code) { mutableListOf() }.addAll(entries.map { it.first })
+            countryNames[code] = name
+        }
+
+        photosByCountry.map { (code, list) ->
+            LocationGroup(
+                placeName = countryNames[code] ?: code,
+                photos = list.sortedByDescending { it.dateTaken }
+            )
+        }.sortedByDescending { it.photoCount }
     }
+
+    private fun gridCellOf(loc: PhotoLocation): Pair<Int, Int> =
+        loc.latitude.roundToInt() to loc.longitude.roundToInt()
 
     private fun readLocation(photo: Photo): PhotoLocation? = try {
         val originalUri = MediaStore.setRequireOriginal(photo.uri)
@@ -40,14 +55,14 @@ class LocationRepository(private val context: Context) {
         null
     }
 
-    private fun reverseGeocode(lat: Double, lon: Double): String = try {
+    private fun reverseGeocodeCountry(cell: Pair<Int, Int>): Pair<String, String>? = try {
         @Suppress("DEPRECATION")
-        val address = Geocoder(context, Locale.getDefault()).getFromLocation(lat, lon, 1)?.firstOrNull()
-        address?.locality ?: address?.subAdminArea ?: address?.adminArea ?: coordinateLabel(lat, lon)
+        val address = Geocoder(context, Locale.getDefault())
+            .getFromLocation(cell.first.toDouble(), cell.second.toDouble(), 1)
+            ?.firstOrNull()
+        val code = address?.countryCode ?: return null
+        code to (address.countryName ?: code)
     } catch (e: Exception) {
-        coordinateLabel(lat, lon)
+        null
     }
-
-    private fun coordinateLabel(lat: Double, lon: Double) =
-        String.format(Locale.getDefault(), "%.4f, %.4f", lat, lon)
 }

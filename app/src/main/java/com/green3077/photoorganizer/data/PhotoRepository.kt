@@ -8,6 +8,7 @@ import com.green3077.photoorganizer.model.Photo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
+import java.time.LocalDate
 import java.time.MonthDay
 import java.time.ZoneId
 
@@ -64,6 +65,9 @@ class PhotoRepository(private val context: Context) {
             }
             .sortedBy { daysUntilNextOccurrence(it.monthDay, today) }
     }
+
+    fun photosForExactDate(photos: List<Photo>, date: LocalDate): List<Photo> =
+        photos.filter { it.dateTaken == date }
 
     fun photosForMonthDay(photos: List<Photo>, monthDay: MonthDay): Map<Int, List<Photo>> {
         return photos

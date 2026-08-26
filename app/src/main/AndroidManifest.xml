@@ -17,7 +17,7 @@
         android:theme="@style/Theme.PhotoOrganizer">
 
         <activity
-            android:name=".MainActivity"
+            android:name=".HomeActivity"
             android:exported="true"
             android:theme="@style/Theme.PhotoOrganizer">
             <intent-filter>
@@ -25,6 +25,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity
+            android:name=".ChallengeActivity"
+            android:exported="false"
+            android:label="@string/title_challenge" />
+
+        <activity
+            android:name=".MainActivity"
+            android:exported="false"
+            android:label="@string/title_date_organize" />
 
         <activity
             android:name=".DetailActivity"

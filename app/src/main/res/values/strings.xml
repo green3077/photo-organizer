@@ -2,6 +2,7 @@
 <resources>
     <string name="app_name">사진정리</string>
     <string name="title_detail">날짜별 사진</string>
+    <string name="title_date_organize">날짜별 정리</string>
     <string name="pick_date">날짜 선택</string>
     <string name="delete">삭제</string>
     <string name="allow_access">사진 접근 허용하기</string>
@@ -12,15 +13,15 @@
     <string name="selected_count">%1$d장 선택됨</string>
     <string name="notification_channel_name">사진정리 챌린지 알림</string>
     <string name="notification_title">오늘의 정리 챌린지 🎯</string>
-    <string name="notification_body">%1$d개 연도, 총 %2$d장의 추억이 있어요. 지금 정리해보세요!</string>
+    <string name="notification_body">%1$s 사진 정리 (%2$d장). 지금 정리해보세요!</string>
     <string name="streak_banner">🔥 %1$d일 연속 정리 챌린지 중!</string>
 
     <string name="tab_by_date">날짜별</string>
-    <string name="tab_by_location">장소별</string>
-    <string name="location_permission_rationale">사진이 찍힌 장소별로 모아 보려면\n위치 정보 접근 권한이 필요해요.</string>
-    <string name="empty_location_title">위치 정보가 있는 사진이 없어요.</string>
-    <string name="empty_location_subtitle">GPS를 켠 상태로 찍은 사진에만 위치 정보가 저장돼요.</string>
-    <string name="title_location_detail">이 장소의 사진</string>
+    <string name="tab_by_location">나라별</string>
+    <string name="location_permission_rationale">해외에서 찍은 사진을 나라별로 모아 보려면\n위치 정보 접근 권한이 필요해요.</string>
+    <string name="empty_location_title">해외에서 찍은 사진이 없어요.</string>
+    <string name="empty_location_subtitle">GPS를 켠 상태로 해외에서 찍은 사진만 나라별로 모여요.</string>
+    <string name="title_location_detail">이 나라의 사진</string>
 
     <string name="title_settings">챌린지 설정</string>
     <string name="settings_enable_label">정리 챌린지 알림</string>
@@ -38,4 +39,22 @@
     <string name="default_move_folder">정리한사진</string>
     <string name="select_photos_first">사진을 먼저 선택해주세요.</string>
     <string name="year_filter_all">전체</string>
+
+    <string name="home_challenge_menu">사진정리 챌린지</string>
+    <string name="home_challenge_menu_subtitle">한 달을 하루씩 정리해요</string>
+    <string name="home_date_menu">날짜별 정리</string>
+    <string name="home_date_menu_subtitle">반복되는 날짜 · 연도별 · 나라별</string>
+
+    <string name="title_challenge">사진정리 챌린지</string>
+    <string name="challenge_intro">정리하고 싶은 연도와 월을 골라주세요.\n그 달 1일부터 하루씩 정리해나갑니다.</string>
+    <string name="select_year">연도 선택</string>
+    <string name="select_month">월 선택</string>
+    <string name="month_label">%1$d월</string>
+    <string name="start_challenge">챌린지 시작</string>
+    <string name="challenge_progress">이 달 %1$d / %2$d일차 · %3$d장</string>
+    <string name="mission_complete">미션 완료</string>
+    <string name="challenge_empty_day">이 날 찍은 사진이 없어요.\n완료를 눌러 다음 날로 넘어가세요.</string>
+    <string name="challenge_done_title">🎉 이 달의 챌린지를 모두 완료했어요!</string>
+    <string name="pick_new_month">다른 연도·월 선택하기</string>
+    <string name="no_photos_for_challenge">사진이 있는 연도가 없어요.</string>
 </resources>
