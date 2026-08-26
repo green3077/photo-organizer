@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.green3077.photoorganizer.data.PhotoDeleter
 import com.green3077.photoorganizer.data.PhotoMover
@@ -41,7 +42,9 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
     protected lateinit var binding: ActivityDetailBinding
     private lateinit var adapter: DetailListAdapter
     protected val repository by lazy { PhotoRepository(this) }
+    private var allPhotosByDate: Map<LocalDate, List<Photo>> = emptyMap()
     private var photosByDate: Map<LocalDate, List<Photo>> = emptyMap()
+    private var yearFilter: Int? = null
     private val selectedIds = mutableSetOf<Long>()
     private var pendingMoveUris: List<Uri> = emptyList()
     private var pendingMoveFolder: String = ""
@@ -119,14 +122,49 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
 
     private fun loadPhotos() {
         lifecycleScope.launch {
-            photosByDate = loadPhotosByDate()
-            selectedIds.retainAll(photosByDate.values.flatten().map { it.id }.toSet())
-            val sections = photosByDate.mapKeys { (date, _) -> sectionLabel(date) }
-            adapter.submit(sections)
-            binding.emptyState.visibility = if (photosByDate.isEmpty()) View.VISIBLE else View.GONE
-            binding.recyclerPhotos.visibility = if (photosByDate.isEmpty()) View.GONE else View.VISIBLE
-            updateSelectionUi()
+            allPhotosByDate = loadPhotosByDate()
+            val years = allPhotosByDate.keys.map { it.year }.distinct().sortedDescending()
+            if (yearFilter != null && yearFilter !in years) yearFilter = null
+            renderYearFilterChips(years)
+            applyFilterAndRender()
         }
+    }
+
+    /** 이 월/일이 여러 연도에 걸쳐 있을 때만 "전체/2024년/2022년…" 칩을 보여준다. */
+    private fun renderYearFilterChips(years: List<Int>) {
+        val group = binding.yearFilterGroup
+        if (years.size <= 1) {
+            group.visibility = View.GONE
+            return
+        }
+        group.visibility = View.VISIBLE
+        group.removeAllViews()
+
+        fun addChip(label: String, year: Int?) {
+            val chip = layoutInflater.inflate(R.layout.item_year_chip, group, false) as Chip
+            chip.text = label
+            chip.tag = year
+            chip.isChecked = yearFilter == year
+            group.addView(chip)
+        }
+        addChip(getString(R.string.year_filter_all), null)
+        years.forEach { addChip(getString(R.string.title_year_detail, it), it) }
+
+        group.setOnCheckedStateChangeListener { g, checkedIds ->
+            val checkedChip = checkedIds.firstOrNull()?.let { g.findViewById<Chip>(it) }
+            yearFilter = checkedChip?.tag as? Int
+            applyFilterAndRender()
+        }
+    }
+
+    private fun applyFilterAndRender() {
+        photosByDate = yearFilter?.let { year -> allPhotosByDate.filterKeys { it.year == year } } ?: allPhotosByDate
+        selectedIds.retainAll(photosByDate.values.flatten().map { it.id }.toSet())
+        val sections = photosByDate.mapKeys { (date, _) -> sectionLabel(date) }
+        adapter.submit(sections)
+        binding.emptyState.visibility = if (photosByDate.isEmpty()) View.VISIBLE else View.GONE
+        binding.recyclerPhotos.visibility = if (photosByDate.isEmpty()) View.GONE else View.VISIBLE
+        updateSelectionUi()
     }
 
     private fun onPhotoClick(photo: Photo) {
