@@ -9,8 +9,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.LocalDate
-import java.time.MonthDay
 import java.time.ZoneId
+import java.time.temporal.ChronoUnit
 
 class PhotoRepository(private val context: Context) {
 
@@ -53,33 +53,40 @@ class PhotoRepository(private val context: Context) {
     }
 
     /**
-     * MonthDay가 2개 이상의 연도에 걸쳐 존재하는 그룹만 추림 ("매년 오늘" 후보).
+     * "일(day of month)"이 같은 사진을 월/연도에 상관없이 한데 묶는다 (예: 15일 → 1월15일, 3월15일, 작년 7월15일 ... 모두 한 그룹).
+     * 실제로 같은 날짜가 두 번 이상 존재하는 그룹만 "반복되는 날"로 추려서 보여준다.
      * today를 기준으로 다음 기념일까지 가장 가까운 순으로 정렬.
      */
-    fun buildRecurringMemoryGroups(photos: List<Photo>, today: MonthDay): List<MemoryGroup> {
+    fun buildRecurringMemoryGroups(photos: List<Photo>, today: LocalDate): List<MemoryGroup> {
         return photos
-            .groupBy { it.monthDay }
-            .filterValues { group -> group.map { it.dateTaken.year }.distinct().size >= 2 }
-            .map { (monthDay, group) ->
-                MemoryGroup(monthDay, group.groupBy { it.dateTaken.year }.toSortedMap(compareByDescending { it }))
+            .groupBy { it.dateTaken.dayOfMonth }
+            .filterValues { group -> group.map { it.dateTaken }.distinct().size >= 2 }
+            .map { (day, group) ->
+                MemoryGroup(day, group.groupBy { it.dateTaken.year }.toSortedMap(compareByDescending { it }))
             }
-            .sortedBy { daysUntilNextOccurrence(it.monthDay, today) }
+            .sortedBy { daysUntilNextOccurrence(it.day, today) }
     }
 
     fun photosForExactDate(photos: List<Photo>, date: LocalDate): List<Photo> =
         photos.filter { it.dateTaken == date }
 
-    fun photosForMonthDay(photos: List<Photo>, monthDay: MonthDay): Map<Int, List<Photo>> {
+    /** 매달/매년 상관없이 그 "일(day of month)"에 찍힌 모든 사진을, 실제 촬영 날짜별로 묶어서 돌려준다. */
+    fun photosForDay(photos: List<Photo>, day: Int): Map<LocalDate, List<Photo>> {
         return photos
-            .filter { it.monthDay == monthDay }
-            .groupBy { it.dateTaken.year }
+            .filter { it.dateTaken.dayOfMonth == day }
+            .groupBy { it.dateTaken }
             .toSortedMap(compareByDescending { it })
     }
 
-    private fun daysUntilNextOccurrence(monthDay: MonthDay, today: MonthDay): Int {
-        if (monthDay == today) return 0
-        val todayValue = today.monthValue * 100 + today.dayOfMonth
-        val targetValue = monthDay.monthValue * 100 + monthDay.dayOfMonth
-        return if (targetValue > todayValue) targetValue - todayValue else targetValue - todayValue + 1231
+    private fun daysUntilNextOccurrence(day: Int, today: LocalDate): Long {
+        var cursor = today
+        repeat(24) {
+            if (day <= cursor.lengthOfMonth()) {
+                val occurrence = cursor.withDayOfMonth(day)
+                if (!occurrence.isBefore(today)) return ChronoUnit.DAYS.between(today, occurrence)
+            }
+            cursor = cursor.plusMonths(1).withDayOfMonth(1)
+        }
+        return Long.MAX_VALUE
     }
 }

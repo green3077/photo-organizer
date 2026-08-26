@@ -3,35 +3,30 @@ package com.green3077.photoorganizer
 import com.green3077.photoorganizer.model.Photo
 import com.green3077.photoorganizer.util.DateFormat
 import java.time.LocalDate
-import java.time.MonthDay
 
 /**
- * 특정 월/일을 열어 연도별로 묶인 사진을 보여준다 (홈 화면 "날짜별" 탭의 상세 화면).
+ * 특정 "일(day of month)"을 열어, 월/연도에 상관없이 그 날짜에 찍힌 사진을 모두 보여준다
+ * (홈 화면 "날짜별" 탭의 상세 화면). 예: 15일 → 1월15일, 3월15일, 작년 7월15일 사진이 한 화면에 모인다.
  */
 class DetailActivity : BasePhotoDetailActivity() {
 
-    private lateinit var monthDay: MonthDay
+    private var day: Int = -1
 
     override fun parseExtras(): Boolean {
-        val month = intent.getIntExtra(EXTRA_MONTH, -1)
-        val day = intent.getIntExtra(EXTRA_DAY, -1)
-        if (month == -1 || day == -1) return false
-        monthDay = MonthDay.of(month, day)
-        return true
+        day = intent.getIntExtra(EXTRA_DAY, -1)
+        return day in 1..31
     }
 
-    override fun screenTitle(): String = DateFormat.monthDayLabel(monthDay)
+    override fun screenTitle(): String = DateFormat.dayLabel(day)
 
     override suspend fun loadPhotosByDate(): Map<LocalDate, List<Photo>> {
         val allPhotos = repository.loadAllPhotos()
-        return repository.photosForMonthDay(allPhotos, monthDay)
-            .mapKeys { (_, photos) -> photos.first().dateTaken }
+        return repository.photosForDay(allPhotos, day)
     }
 
-    override fun sectionLabel(date: LocalDate): String = DateFormat.yearLabel(date.year, LocalDate.now())
+    override fun sectionLabel(date: LocalDate): String = DateFormat.fullDateLabel(date)
 
     companion object {
-        const val EXTRA_MONTH = "extra_month"
         const val EXTRA_DAY = "extra_day"
     }
 }
