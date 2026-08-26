@@ -23,7 +23,8 @@ sealed class DetailRow {
 class DetailListAdapter(
     private val isSelected: (Long) -> Boolean,
     private val onPhotoClick: (Photo) -> Unit,
-    private val onToggleSelect: (Photo) -> Unit
+    private val onToggleSelect: (Photo) -> Unit,
+    private val onToggleSection: (photos: List<Photo>, selected: Boolean) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val items = mutableListOf<DetailRow>()
@@ -51,6 +52,17 @@ class DetailListAdapter(
             (items.getOrNull(i) as? DetailRow.SectionHeader)?.let { return it.label }
         }
         return null
+    }
+
+    /** 헤더 바로 다음부터 다음 헤더(혹은 끝) 전까지, 이 섹션에 속한 사진들. */
+    private fun photosInSectionAt(headerPosition: Int): List<Photo> {
+        val photos = mutableListOf<Photo>()
+        for (i in headerPosition + 1 until items.size) {
+            val row = items[i]
+            if (row is DetailRow.SectionHeader) break
+            if (row is DetailRow.PhotoRow) photos.add(row.photo)
+        }
+        return photos
     }
 
     override fun getItemViewType(position: Int) = when (items[position]) {
@@ -81,6 +93,14 @@ class DetailListAdapter(
         fun bind(header: DetailRow.SectionHeader) {
             binding.textLabel.text = header.label
             binding.textCount.text = "${header.count}장"
+
+            val position = bindingAdapterPosition
+            val photos = if (position != RecyclerView.NO_POSITION) photosInSectionAt(position) else emptyList()
+            val allSelected = photos.isNotEmpty() && photos.all { isSelected(it.id) }
+            binding.checkIcon.setImageResource(
+                if (allSelected) R.drawable.ic_check_circle_filled else R.drawable.ic_check_circle_outline
+            )
+            binding.checkIcon.setOnClickListener { onToggleSection(photos, !allSelected) }
         }
     }
 

@@ -104,7 +104,8 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
         adapter = DetailListAdapter(
             isSelected = ::isPhotoSelected,
             onPhotoClick = ::onPhotoClick,
-            onToggleSelect = ::toggleSelection
+            onToggleSelect = ::toggleSelection,
+            onToggleSection = ::setSectionSelected
         )
 
         val spanCount = 3
@@ -220,6 +221,14 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
 
     private fun toggleSelection(photo: Photo) {
         setSelected(photo, !isPhotoSelected(photo.id))
+    }
+
+    /** 섹션 헤더의 체크 아이콘 — 그 날짜(섹션)의 사진 전체를 한 번에 선택/해제한다. */
+    private fun setSectionSelected(photos: List<Photo>, selected: Boolean) {
+        val ids = photos.map { it.id }
+        if (selected) selectedIds.addAll(ids) else selectedIds.removeAll(ids.toSet())
+        adapter.refreshSelectionState()
+        updateSelectionUi()
     }
 
     private fun clearSelection() {
