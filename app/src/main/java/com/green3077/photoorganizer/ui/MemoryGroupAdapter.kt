@@ -51,6 +51,8 @@ class MemoryGroupAdapter(
 
     override fun getItemCount() = items.size
 
+    fun labelAt(position: Int): String? = items.getOrNull(position)?.let { DateFormat.dayLabel(it.day) }
+
     inner class ListViewHolder(private val binding: ItemMemoryGroupBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(group: MemoryGroup) {

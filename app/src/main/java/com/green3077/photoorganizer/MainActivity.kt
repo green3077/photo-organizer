@@ -65,6 +65,7 @@ class MainActivity : AppCompatActivity() {
         binding.recyclerGroups.layoutManager = dateLayoutManager(groupViewMode)
         binding.recyclerGroups.adapter = groupAdapter
         binding.fastScrollbar.attachTo(binding.recyclerGroups)
+        binding.fastScrollbar.labelProvider = groupAdapter::labelAt
 
         binding.toolbar.setNavigationOnClickListener { finish() }
         binding.toolbar.setOnMenuItemClickListener { item ->
@@ -92,6 +93,8 @@ class MainActivity : AppCompatActivity() {
                 binding.recyclerGroups.layoutManager =
                     if (currentTab == Tab.DATE) dateLayoutManager(groupViewMode) else LinearLayoutManager(this@MainActivity)
                 binding.recyclerGroups.adapter = if (currentTab == Tab.DATE) groupAdapter else locationAdapter
+                binding.fastScrollbar.labelProvider =
+                    if (currentTab == Tab.DATE) groupAdapter::labelAt else locationAdapter::labelAt
                 binding.fastScrollbar.refresh()
                 updateToggleMenuItem()
                 refreshCurrentTab()
@@ -135,6 +138,22 @@ class MainActivity : AppCompatActivity() {
 
     private fun onMediaPermissionGranted() {
         loadPhotos()
+        requestMissingSupplementaryPermissions()
+    }
+
+    /**
+     * 예전 버전에서 이미 사진 접근을 허용해둔 사용자는 나중에 추가된 동영상 권한
+     * (READ_MEDIA_VIDEO)을 요청받을 기회가 없었다 — 권한 게이트가 핵심 권한(사진)
+     * 기준으로만 열리기 때문. 핵심 권한은 이미 있는데 부가 권한이 빠져 있으면 여기서
+     * 조용히 마저 요청한다.
+     */
+    private fun requestMissingSupplementaryPermissions() {
+        val missing = requiredPermissions().filter {
+            ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+        }
+        if (missing.isNotEmpty()) {
+            requestPermissionLauncher.launch(missing.toTypedArray())
+        }
     }
 
     private fun loadPhotos() {

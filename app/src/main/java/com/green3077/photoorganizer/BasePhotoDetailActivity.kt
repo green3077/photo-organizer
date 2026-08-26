@@ -124,6 +124,7 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
         ).attach()
 
         binding.fastScrollbar.attachTo(binding.recyclerPhotos)
+        binding.fastScrollbar.labelProvider = adapter::labelAt
     }
 
     override fun onResume() {

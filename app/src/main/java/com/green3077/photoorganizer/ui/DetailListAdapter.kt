@@ -45,6 +45,14 @@ class DetailListAdapter(
 
     fun photoAt(position: Int): Photo? = (items.getOrNull(position) as? DetailRow.PhotoRow)?.photo
 
+    /** 이 position 바로 위(포함)에서 가장 가까운 섹션 헤더의 라벨(연도/날짜 등)을 찾는다. */
+    fun labelAt(position: Int): String? {
+        for (i in position downTo 0) {
+            (items.getOrNull(i) as? DetailRow.SectionHeader)?.let { return it.label }
+        }
+        return null
+    }
+
     override fun getItemViewType(position: Int) = when (items[position]) {
         is DetailRow.SectionHeader -> TYPE_HEADER
         is DetailRow.PhotoRow -> TYPE_PHOTO

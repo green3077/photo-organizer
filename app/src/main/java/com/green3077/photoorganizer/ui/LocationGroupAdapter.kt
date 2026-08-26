@@ -28,6 +28,8 @@ class LocationGroupAdapter(
 
     override fun getItemCount() = items.size
 
+    fun labelAt(position: Int): String? = items.getOrNull(position)?.placeName
+
     inner class ViewHolder(private val binding: ItemLocationGroupBinding) :
         RecyclerView.ViewHolder(binding.root) {
         fun bind(group: LocationGroup) {
