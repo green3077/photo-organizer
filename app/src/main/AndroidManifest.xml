@@ -53,6 +53,15 @@
             android:exported="false" />
 
         <activity
+            android:name=".CalendarActivity"
+            android:exported="false"
+            android:label="@string/title_calendar" />
+
+        <activity
+            android:name=".DayDetailActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".SettingsActivity"
             android:exported="false"
             android:label="@string/title_settings" />

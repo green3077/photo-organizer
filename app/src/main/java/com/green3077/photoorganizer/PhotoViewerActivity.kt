@@ -2,14 +2,18 @@ package com.green3077.photoorganizer
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.View
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.widget.PopupMenu
 import androidx.lifecycle.lifecycleScope
 import com.green3077.photoorganizer.data.PhotoDeleter
+import com.green3077.photoorganizer.data.PhotoDetailsLoader
 import com.green3077.photoorganizer.data.PhotoRepository
 import com.green3077.photoorganizer.data.StreakTracker
 import com.green3077.photoorganizer.databinding.ActivityPhotoViewerBinding
 import com.green3077.photoorganizer.model.Photo
+import com.green3077.photoorganizer.ui.PhotoDetailsSheet
 import com.green3077.photoorganizer.ui.PhotoPagerAdapter
 import com.green3077.photoorganizer.ui.PhotoViewerHolder
 import kotlinx.coroutines.launch
@@ -18,7 +22,9 @@ class PhotoViewerActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityPhotoViewerBinding
     private val repository by lazy { PhotoRepository(this) }
+    private val detailsLoader by lazy { PhotoDetailsLoader(this) }
     private var photos: List<Photo> = emptyList()
+    private var chromeVisible = true
 
     private val deleteLauncher =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
@@ -39,9 +45,10 @@ class PhotoViewerActivity : AppCompatActivity() {
         binding.btnShare.setOnClickListener {
             photos.getOrNull(binding.pager.currentItem)?.let { sharePhoto(it) }
         }
+        binding.btnMore.setOnClickListener { view ->
+            photos.getOrNull(binding.pager.currentItem)?.let { showMoreMenu(view, it) }
+        }
 
-        // 삭제 확인 시스템 다이얼로그가 떠 있는 동안 프로세스가 종료되면 static 홀더가
-        // 비워진 채로 재생성될 수 있으므로, 그럴 땐 인텐트에 담아둔 사진 ID로 다시 불러온다.
         val cached = PhotoViewerHolder.photos
         if (cached.isNotEmpty()) {
             photos = cached
@@ -79,8 +86,43 @@ class PhotoViewerActivity : AppCompatActivity() {
         startActivity(Intent.createChooser(intent, getString(R.string.share_title)))
     }
 
+    private fun showMoreMenu(anchor: View, photo: Photo) {
+        PopupMenu(this, anchor).apply {
+            menuInflater.inflate(R.menu.menu_photo_viewer_more, menu)
+            setOnMenuItemClickListener { item ->
+                when (item.itemId) {
+                    R.id.action_detail_info -> {
+                        showDetailInfo(photo)
+                        true
+                    }
+                    else -> false
+                }
+            }
+        }.show()
+    }
+
+    private fun showDetailInfo(photo: Photo) {
+        lifecycleScope.launch {
+            val details = detailsLoader.load(photo)
+            PhotoDetailsSheet.show(this@PhotoViewerActivity, photo, details)
+        }
+    }
+
+    /** 사진을 한 번 탭하면 툴바·하단 버튼을 숨기거나 다시 보여준다(다른 갤러리 앱과 동일한 몰입 보기). */
+    private fun toggleChrome() {
+        chromeVisible = !chromeVisible
+        val targetAlpha = if (chromeVisible) 1f else 0f
+        listOf(binding.toolbar, binding.bottomActionBar).forEach { view ->
+            view.animate().alpha(targetAlpha).setDuration(200).withStartAction {
+                if (chromeVisible) view.visibility = View.VISIBLE
+            }.withEndAction {
+                if (!chromeVisible) view.visibility = View.INVISIBLE
+            }.start()
+        }
+    }
+
     private fun showPager(index: Int) {
-        binding.pager.adapter = PhotoPagerAdapter(photos)
+        binding.pager.adapter = PhotoPagerAdapter(photos, onSingleTap = ::toggleChrome)
         binding.pager.setCurrentItem(index.coerceIn(0, photos.size - 1), false)
     }
 
@@ -92,7 +134,7 @@ class PhotoViewerActivity : AppCompatActivity() {
             finish()
             return
         }
-        binding.pager.adapter = PhotoPagerAdapter(photos)
+        binding.pager.adapter = PhotoPagerAdapter(photos, onSingleTap = ::toggleChrome)
         binding.pager.setCurrentItem(current.coerceAtMost(photos.size - 1), false)
     }
 

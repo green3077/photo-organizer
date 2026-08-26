@@ -154,6 +154,10 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
 
         fun addChip(label: String, year: Int?) {
             val chip = layoutInflater.inflate(R.layout.item_year_chip, group, false) as Chip
+            // item_year_chip.xml에 id가 없어 매번 View.NO_ID로 뜬다 — 그러면 아래
+            // setOnCheckedStateChangeListener의 findViewById(checkedId)가 항상 null을
+            // 돌려줘서 어떤 연도를 눌러도 필터가 "전체"로 되돌아갔다. 인스턴스별 id를 직접 준다.
+            chip.id = View.generateViewId()
             chip.text = label
             chip.tag = year
             chip.isChecked = yearFilter == year

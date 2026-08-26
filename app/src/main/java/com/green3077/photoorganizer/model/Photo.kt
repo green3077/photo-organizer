@@ -16,6 +16,8 @@ data class MemoryGroup(
     val photosByYear: Map<Int, List<Photo>>
 ) {
     val photoCount: Int get() = photosByYear.values.sumOf { it.size }
+    val imageCount: Int get() = photosByYear.values.sumOf { list -> list.count { !it.isVideo } }
+    val videoCount: Int get() = photosByYear.values.sumOf { list -> list.count { it.isVideo } }
     val dateCount: Int get() = photosByYear.values.flatten().map { it.dateTaken }.distinct().size
     val coverPhoto: Photo get() = photosByYear.entries.maxBy { it.key }.value.first()
 }

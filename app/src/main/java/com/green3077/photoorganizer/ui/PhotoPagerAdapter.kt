@@ -7,8 +7,10 @@ import coil.load
 import com.green3077.photoorganizer.databinding.ItemPhotoPageBinding
 import com.green3077.photoorganizer.model.Photo
 
-class PhotoPagerAdapter(private val photos: List<Photo>) :
-    RecyclerView.Adapter<PhotoPagerAdapter.ViewHolder>() {
+class PhotoPagerAdapter(
+    private val photos: List<Photo>,
+    private val onSingleTap: () -> Unit
+) : RecyclerView.Adapter<PhotoPagerAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val binding = ItemPhotoPageBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -17,6 +19,7 @@ class PhotoPagerAdapter(private val photos: List<Photo>) :
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.binding.image.load(photos[position].uri)
+        holder.binding.image.onSingleTap = onSingleTap
     }
 
     override fun getItemCount() = photos.size

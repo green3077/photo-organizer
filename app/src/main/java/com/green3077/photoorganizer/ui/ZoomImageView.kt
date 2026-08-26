@@ -21,6 +21,9 @@ class ZoomImageView @JvmOverloads constructor(
     attrs: AttributeSet? = null
 ) : AppCompatImageView(context, attrs) {
 
+    /** 확대/이동 제스처가 아닌 순수한 한 번 탭. 툴바·하단 바 표시를 토글하는 데 쓴다. */
+    var onSingleTap: (() -> Unit)? = null
+
     private val baseMatrix = Matrix()
     private val drawMatrix = Matrix()
 
@@ -57,6 +60,11 @@ class ZoomImageView @JvmOverloads constructor(
             drawMatrix.postTranslate(-distanceX, -distanceY)
             constrainTranslation()
             imageMatrix = drawMatrix
+            return true
+        }
+
+        override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
+            onSingleTap?.invoke()
             return true
         }
     })

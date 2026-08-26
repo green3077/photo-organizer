@@ -58,7 +58,8 @@ class MemoryGroupAdapter(
         fun bind(group: MemoryGroup) {
             binding.image.load(group.coverPhoto.uri) { crossfade(true) }
             binding.textDate.text = DateFormat.dayLabel(group.day)
-            binding.textSummary.text = "${group.dateCount}개 날짜 · 총 ${group.photoCount}장"
+            val breakdown = if (group.videoCount > 0) " (사진 ${group.imageCount}장, 동영상 ${group.videoCount}개)" else ""
+            binding.textSummary.text = "${group.dateCount}개 날짜 · 총 ${group.photoCount}장$breakdown"
             binding.root.setOnClickListener { onClick(group) }
         }
     }
