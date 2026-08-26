@@ -28,7 +28,9 @@ class LocationGroupAdapter(
 
     override fun getItemCount() = items.size
 
-    fun labelAt(position: Int): String? = items.getOrNull(position)?.placeName
+    /** 스크롤바 말풍선용 — "지역별 정리"의 여행 라벨처럼 긴 문자열은 잘라서 보여준다. */
+    fun labelAt(position: Int): String? =
+        items.getOrNull(position)?.placeName?.let { if (it.length > LABEL_MAX_LENGTH) it.take(LABEL_MAX_LENGTH) + "…" else it }
 
     inner class ViewHolder(private val binding: ItemLocationGroupBinding) :
         RecyclerView.ViewHolder(binding.root) {
@@ -38,5 +40,9 @@ class LocationGroupAdapter(
             binding.textSummary.text = "${group.photoCount}장"
             binding.root.setOnClickListener { onClick(group) }
         }
+    }
+
+    private companion object {
+        const val LABEL_MAX_LENGTH = 10
     }
 }

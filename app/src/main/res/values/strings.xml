@@ -6,6 +6,8 @@
     <string name="title_day_organize">일별 정리</string>
     <string name="title_month_organize">월별 정리</string>
     <string name="title_location_organize">나라별 정리</string>
+    <string name="title_region_organize">지역별 정리</string>
+    <string name="title_place_organize">장소별 정리</string>
     <string name="pick_date">날짜 선택</string>
     <string name="delete">삭제</string>
     <string name="delete_confirm_message">사진을 삭제할까요?</string>
@@ -23,6 +25,11 @@
     <string name="empty_location_title">해외에서 찍은 사진이 없어요.</string>
     <string name="empty_location_subtitle">GPS를 켠 상태로 해외에서 찍은 사진만 나라별로 모여요.</string>
     <string name="title_location_detail">이 나라의 사진</string>
+
+    <string name="region_permission_rationale">국내 여행 사진을 장소별로 모아 보려면\n위치 정보 접근 권한이 필요해요.</string>
+    <string name="empty_region_title">다녀온 여행지가 없어요.</string>
+    <string name="empty_region_subtitle">집에서 좀 떨어진 곳에서 GPS를 켠 채로 찍은 사진이 있으면 여행으로 모여요.</string>
+    <string name="trip_label_suffix">여행</string>
 
     <string name="title_settings">설정</string>
 
@@ -64,13 +71,17 @@
     <string name="next_month">다음 달</string>
     <string name="pick_year_month">연도·월 선택</string>
 
-    <string name="home_location_menu">나라별 정리</string>
-    <string name="home_location_menu_subtitle">해외에서 찍은 사진을 나라별로 모아서 봐요</string>
+    <string name="home_location_menu">장소별 정리</string>
+    <string name="home_location_menu_subtitle">국내외 여행 사진을 장소별로 모아서 봐요</string>
 
     <string name="chooser_day_menu">일별 정리</string>
     <string name="chooser_day_menu_subtitle">반복되는 날짜만 모아서 봐요</string>
     <string name="chooser_month_menu">월별 정리</string>
     <string name="chooser_month_menu_subtitle">월별로 모든 사진을 모아서 봐요</string>
+    <string name="chooser_country_menu">나라별 정리(해외)</string>
+    <string name="chooser_country_menu_subtitle">해외에서 찍은 사진을 나라별로 모아서 봐요</string>
+    <string name="chooser_region_menu">지역별 정리(국내)</string>
+    <string name="chooser_region_menu_subtitle">국내 여행 사진을 다녀온 장소와 날짜로 모아서 봐요</string>
 
     <string name="toggle_grid_view">바둑판 보기</string>
     <string name="toggle_list_view">목록 보기</string>

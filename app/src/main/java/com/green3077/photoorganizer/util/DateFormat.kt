@@ -12,6 +12,14 @@ object DateFormat {
 
     fun fullDateLabel(date: LocalDate): String = "${date.year}년 ${date.monthValue}월 ${date.dayOfMonth}일"
 
+    /** 여행 카드용 날짜 범위: 하루짜리는 "2026년 6월 6일", 여러 날이면 "2026년 6월 6일~6월 8일". */
+    fun tripDateRangeLabel(start: LocalDate, end: LocalDate): String {
+        val startLabel = fullDateLabel(start)
+        if (start == end) return startLabel
+        val endLabel = if (start.year == end.year) monthDayLabel(MonthDay.from(end)) else fullDateLabel(end)
+        return "$startLabel~$endLabel"
+    }
+
     fun fileSize(bytes: Long): String = when {
         bytes <= 0 -> "-"
         bytes < 1024 -> "${bytes}B"

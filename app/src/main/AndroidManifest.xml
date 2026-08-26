@@ -49,9 +49,19 @@
             android:exported="false" />
 
         <activity
+            android:name=".PlaceChooserActivity"
+            android:exported="false"
+            android:label="@string/title_place_organize" />
+
+        <activity
             android:name=".LocationActivity"
             android:exported="false"
             android:label="@string/title_location_organize" />
+
+        <activity
+            android:name=".RegionActivity"
+            android:exported="false"
+            android:label="@string/title_region_organize" />
 
         <activity
             android:name=".DetailActivity"

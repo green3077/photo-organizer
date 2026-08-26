@@ -7,7 +7,7 @@ import com.google.android.gms.ads.AdRequest
 import com.green3077.photoorganizer.databinding.ActivityHomeBinding
 
 /**
- * 앱을 열면 바로 사진 목록이 나오지 않고, "날짜별 정리"/"달력으로 보기"/"나라별 정리" 메뉴로
+ * 앱을 열면 바로 사진 목록이 나오지 않고, "날짜별 정리"/"달력으로 보기"/"장소별 정리" 메뉴로
  * 들어가는 진입 화면. 실제 사진 접근 권한 확인/요청은 각 화면에서 필요할 때 처리한다.
  */
 class HomeActivity : AppCompatActivity() {
@@ -30,7 +30,7 @@ class HomeActivity : AppCompatActivity() {
             startActivity(Intent(this, CalendarActivity::class.java))
         }
         binding.cardLocation.setOnClickListener {
-            startActivity(Intent(this, LocationActivity::class.java))
+            startActivity(Intent(this, PlaceChooserActivity::class.java))
         }
 
         binding.adView.loadAd(AdRequest.Builder().build())
