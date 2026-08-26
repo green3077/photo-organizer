@@ -33,18 +33,11 @@ class PhotoViewerActivity : AppCompatActivity() {
 
         setSupportActionBar(binding.toolbar)
         binding.toolbar.setNavigationOnClickListener { finish() }
-        binding.toolbar.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.action_delete -> {
-                    photos.getOrNull(binding.pager.currentItem)?.let { deleter.requestDelete(listOf(it.uri)) }
-                    true
-                }
-                R.id.action_share -> {
-                    photos.getOrNull(binding.pager.currentItem)?.let { sharePhoto(it) }
-                    true
-                }
-                else -> false
-            }
+        binding.btnDelete.setOnClickListener {
+            photos.getOrNull(binding.pager.currentItem)?.let { deleter.requestDelete(listOf(it.uri)) }
+        }
+        binding.btnShare.setOnClickListener {
+            photos.getOrNull(binding.pager.currentItem)?.let { sharePhoto(it) }
         }
 
         // 삭제 확인 시스템 다이얼로그가 떠 있는 동안 프로세스가 종료되면 static 홀더가

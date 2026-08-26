@@ -17,17 +17,16 @@ sealed class DetailRow {
 
 /**
  * 연도별(날짜 상세)이든 날짜별(장소 상세)이든, 문자열 라벨을 키로 하는 섹션 목록을 그린다.
- * 선택 모드일 때는 모든 사진에 체크박스를 보여줘서 "길게 눌러야 선택된다"는 걸
- * 몰라도 바로 탭으로 고를 수 있게 한다.
+ * 모든 사진에 체크박스를 항상 보여줘서, 길게 누르는 숨은 제스처를 몰라도
+ * 체크박스를 탭하는 것만으로 바로 선택할 수 있게 한다.
  */
 class DetailListAdapter(
     private val isSelected: (Long) -> Boolean,
     private val onPhotoClick: (Photo) -> Unit,
-    private val onPhotoLongClick: (Photo) -> Unit
+    private val onToggleSelect: (Photo) -> Unit
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val items = mutableListOf<DetailRow>()
-    private var selectionMode = false
 
     fun submit(sections: Map<String, List<Photo>>) {
         items.clear()
@@ -38,9 +37,7 @@ class DetailListAdapter(
         notifyDataSetChanged()
     }
 
-    fun setSelectionMode(enabled: Boolean) {
-        if (selectionMode == enabled) return
-        selectionMode = enabled
+    fun refreshSelectionState() {
         notifyDataSetChanged()
     }
 
@@ -83,20 +80,21 @@ class DetailListAdapter(
             binding.image.load(photo.uri) { crossfade(true) }
             val selected = isSelected(photo.id)
             binding.checkOverlay.visibility = if (selected) View.VISIBLE else View.GONE
-            if (selectionMode) {
-                binding.checkIcon.visibility = View.VISIBLE
-                binding.checkIcon.setImageResource(
-                    if (selected) R.drawable.ic_check_circle_filled else R.drawable.ic_check_circle_outline
-                )
-            } else {
-                binding.checkIcon.visibility = View.GONE
+            binding.checkIcon.setImageResource(
+                if (selected) R.drawable.ic_check_circle_filled else R.drawable.ic_check_circle_outline
+            )
+            binding.checkIcon.setOnClickListener { onToggleSelect(photo) }
+            binding.root.setOnClickListener {
+                if (isSelected(photo.id) || hasAnySelected()) onToggleSelect(photo) else onPhotoClick(photo)
             }
-            binding.root.setOnClickListener { onPhotoClick(photo) }
             binding.root.setOnLongClickListener {
-                onPhotoLongClick(photo)
+                onToggleSelect(photo)
                 true
             }
         }
+
+        private fun hasAnySelected(): Boolean =
+            items.any { it is DetailRow.PhotoRow && isSelected(it.photo.id) }
     }
 
     companion object {

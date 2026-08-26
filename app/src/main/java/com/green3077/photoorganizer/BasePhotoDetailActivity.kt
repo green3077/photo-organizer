@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.addCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
@@ -30,9 +31,10 @@ import java.time.LocalDate
  * DetailActivity / LocationDetailActivity / YearDetailActivity 공통 골격.
  * 무엇을(어떤 조건으로) 불러올지, 섹션 라벨을 뭐라 붙일지만 하위 클래스가 정한다.
  *
- * 툴바의 "선택" 버튼(항상 보임)을 누르거나 사진을 길게 누르면 선택 모드로 들어가고,
- * 그때부터는 사진을 탭할 때마다 체크박스가 토글된다 — 길게 누르는 제스처를 몰라도
- * 바로 발견할 수 있게 하기 위함.
+ * 삭제/공유/이동은 툴바 메뉴 아이콘이 아니라 화면 아래 항상 고정된 버튼으로 뒀다 —
+ * 툴바/액션바 메뉴는 기기·테마에 따라 표시 방식이 달라질 여지가 있어서, 항상
+ * 같은 자리에 보이는 일반 뷰 버튼이 훨씬 확실하다. 사진마다 체크박스도 항상 보여줘서
+ * 길게 누르는 숨은 제스처를 몰라도 바로 탭으로 선택할 수 있다.
  */
 abstract class BasePhotoDetailActivity : AppCompatActivity() {
 
@@ -41,7 +43,6 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
     protected val repository by lazy { PhotoRepository(this) }
     private var photosByDate: Map<LocalDate, List<Photo>> = emptyMap()
     private val selectedIds = mutableSetOf<Long>()
-    private var selectionMode = false
     private var pendingMoveUris: List<Uri> = emptyList()
     private var pendingMoveFolder: String = ""
 
@@ -49,7 +50,7 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
                 StreakTracker.recordOrganizedToday(this)
-                exitSelectionMode()
+                selectedIds.clear()
                 loadPhotos()
             }
         }
@@ -60,7 +61,7 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
             if (result.resultCode == RESULT_OK) {
                 mover.applyMove(pendingMoveUris, pendingMoveFolder)
                 StreakTracker.recordOrganizedToday(this)
-                exitSelectionMode()
+                selectedIds.clear()
                 loadPhotos()
             }
         }
@@ -85,37 +86,20 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         binding.toolbar.title = screenTitle()
         binding.toolbar.setNavigationOnClickListener {
-            if (selectionMode) exitSelectionMode() else finish()
-        }
-        binding.toolbar.setOnMenuItemClickListener { item ->
-            when (item.itemId) {
-                R.id.action_select -> {
-                    enterSelectionMode()
-                    true
-                }
-                R.id.action_delete -> {
-                    confirmDelete()
-                    true
-                }
-                R.id.action_share -> {
-                    confirmShare()
-                    true
-                }
-                R.id.action_move -> {
-                    confirmMove()
-                    true
-                }
-                else -> false
-            }
+            if (selectedIds.isNotEmpty()) clearSelection() else finish()
         }
         onBackPressedDispatcher.addCallback(this) {
-            if (selectionMode) exitSelectionMode() else finish()
+            if (selectedIds.isNotEmpty()) clearSelection() else finish()
         }
+
+        binding.btnDelete.setOnClickListener { confirmDelete() }
+        binding.btnShare.setOnClickListener { confirmShare() }
+        binding.btnMove.setOnClickListener { confirmMove() }
 
         adapter = DetailListAdapter(
             isSelected = { selectedIds.contains(it) },
             onPhotoClick = ::onPhotoClick,
-            onPhotoLongClick = ::toggleSelection
+            onToggleSelect = ::toggleSelection
         )
 
         val spanCount = 3
@@ -146,10 +130,6 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
     }
 
     private fun onPhotoClick(photo: Photo) {
-        if (selectionMode) {
-            toggleSelection(photo)
-            return
-        }
         val datePhotos = photosByDate[photo.dateTaken].orEmpty()
         PhotoViewerHolder.photos = datePhotos
         val index = datePhotos.indexOfFirst { it.id == photo.id }.coerceAtLeast(0)
@@ -162,55 +142,45 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
     }
 
     private fun toggleSelection(photo: Photo) {
-        if (!selectionMode) {
-            selectionMode = true
-            adapter.setSelectionMode(true)
-            binding.toolbar.navigationIcon = ContextCompat.getDrawable(this, R.drawable.ic_close)
-        }
         if (!selectedIds.remove(photo.id)) selectedIds.add(photo.id)
-        adapter.notifyDataSetChanged()
+        adapter.refreshSelectionState()
         updateSelectionUi()
     }
 
-    private fun enterSelectionMode() {
-        if (selectionMode) return
-        selectionMode = true
-        adapter.setSelectionMode(true)
-        binding.toolbar.navigationIcon = ContextCompat.getDrawable(this, R.drawable.ic_close)
-        updateSelectionUi()
-    }
-
-    private fun exitSelectionMode() {
-        selectionMode = false
+    private fun clearSelection() {
         selectedIds.clear()
-        adapter.setSelectionMode(false)
-        binding.toolbar.navigationIcon = ContextCompat.getDrawable(this, R.drawable.ic_back)
+        adapter.refreshSelectionState()
         updateSelectionUi()
     }
 
     private fun updateSelectionUi() {
         val hasSelection = selectedIds.isNotEmpty()
-        binding.toolbar.menu.findItem(R.id.action_select)?.isVisible = !selectionMode
-        binding.toolbar.menu.findItem(R.id.action_delete)?.isVisible = selectionMode && hasSelection
-        binding.toolbar.menu.findItem(R.id.action_share)?.isVisible = selectionMode && hasSelection
-        binding.toolbar.menu.findItem(R.id.action_move)?.isVisible = selectionMode && hasSelection
-        binding.toolbar.title = when {
-            hasSelection -> getString(R.string.selected_count, selectedIds.size)
-            selectionMode -> getString(R.string.select_hint)
-            else -> screenTitle()
-        }
+        binding.toolbar.navigationIcon = ContextCompat.getDrawable(
+            this,
+            if (hasSelection) R.drawable.ic_close else R.drawable.ic_back
+        )
+        binding.toolbar.title = if (hasSelection) getString(R.string.selected_count, selectedIds.size) else screenTitle()
     }
 
     private fun selectedUris(): List<Uri> =
         photosByDate.values.flatten().filter { selectedIds.contains(it.id) }.map { it.uri }
 
+    private fun requireSelection(): List<Uri>? {
+        val uris = selectedUris()
+        if (uris.isEmpty()) {
+            Toast.makeText(this, R.string.select_photos_first, Toast.LENGTH_SHORT).show()
+            return null
+        }
+        return uris
+    }
+
     private fun confirmDelete() {
-        deleter.requestDelete(selectedUris())
+        val uris = requireSelection() ?: return
+        deleter.requestDelete(uris)
     }
 
     private fun confirmShare() {
-        val uris = selectedUris()
-        if (uris.isEmpty()) return
+        val uris = requireSelection() ?: return
         val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
             type = "image/*"
             putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(uris))
@@ -220,8 +190,7 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
     }
 
     private fun confirmMove() {
-        val uris = selectedUris()
-        if (uris.isEmpty()) return
+        val uris = requireSelection() ?: return
         val input = EditText(this).apply {
             setText(PhotoMover.DEFAULT_FOLDER)
             setSelection(text.length)

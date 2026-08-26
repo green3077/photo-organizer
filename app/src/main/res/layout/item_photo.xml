@@ -22,11 +22,15 @@
 
     <ImageView
         android:id="@+id/checkIcon"
-        android:layout_width="22dp"
-        android:layout_height="22dp"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
         android:layout_gravity="top|end"
-        android:layout_margin="4dp"
-        android:visibility="gone"
+        android:layout_margin="2dp"
+        android:padding="5dp"
+        android:background="?attr/selectableItemBackgroundBorderless"
+        android:clickable="true"
+        android:focusable="true"
+        android:src="@drawable/ic_check_circle_outline"
         tools:ignore="ContentDescription" />
 
 </FrameLayout>
