@@ -52,12 +52,20 @@ class SettingsActivity : AppCompatActivity() {
         MaterialAlertDialogBuilder(this)
             .setTitle(getString(R.string.update_available_title))
             .setMessage(getString(R.string.update_available_message, update.versionName, BuildConfig.VERSION_NAME))
-            .setPositiveButton(getString(R.string.update_now)) { _, _ ->
-                updateDownloader.download(update) {
-                    Toast.makeText(this, R.string.update_download_failed, Toast.LENGTH_SHORT).show()
-                }
-            }
+            .setPositiveButton(getString(R.string.update_now)) { _, _ -> downloadAndInstall(update) }
             .setNegativeButton(getString(R.string.update_later), null)
             .show()
+    }
+
+    private fun downloadAndInstall(update: UpdateInfo) {
+        Toast.makeText(this, R.string.update_downloading, Toast.LENGTH_SHORT).show()
+        lifecycleScope.launch {
+            try {
+                val file = updateDownloader.download(update)
+                updateDownloader.installApk(file)
+            } catch (e: Exception) {
+                Toast.makeText(this@SettingsActivity, R.string.update_download_failed, Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 }
