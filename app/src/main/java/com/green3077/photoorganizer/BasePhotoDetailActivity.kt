@@ -260,7 +260,11 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
 
     private fun confirmDelete() {
         val uris = requireSelection() ?: return
-        deleter.requestDelete(uris)
+        MaterialAlertDialogBuilder(this)
+            .setMessage(getString(R.string.delete_confirm_message))
+            .setNegativeButton(getString(android.R.string.cancel), null)
+            .setPositiveButton(getString(R.string.delete)) { _, _ -> deleter.requestDelete(uris) }
+            .show()
     }
 
     private fun confirmShare() {
@@ -275,17 +279,37 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
 
     private fun confirmMove() {
         val uris = requireSelection() ?: return
+        lifecycleScope.launch {
+            val folders = mover.listExistingFolders()
+            showFolderPicker(folders) { relativePath ->
+                pendingMoveUris = uris
+                pendingMoveFolder = relativePath
+                mover.requestMove(uris)
+            }
+        }
+    }
+
+    private fun showFolderPicker(folders: List<String>, onPicked: (String) -> Unit) {
+        val labels = (listOf(getString(R.string.move_new_folder)) + folders.map { it.trimEnd('/') }).toTypedArray()
+        MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.move_dialog_title))
+            .setItems(labels) { _, which ->
+                if (which == 0) showNewFolderInput(onPicked) else onPicked(folders[which - 1])
+            }
+            .show()
+    }
+
+    private fun showNewFolderInput(onPicked: (String) -> Unit) {
         val input = EditText(this).apply {
             setText(PhotoMover.DEFAULT_FOLDER)
             setSelection(text.length)
+            hint = getString(R.string.move_new_folder_hint)
         }
         MaterialAlertDialogBuilder(this)
             .setTitle(getString(R.string.move_dialog_title))
             .setView(input)
             .setPositiveButton(getString(R.string.move_confirm)) { _, _ ->
-                pendingMoveUris = uris
-                pendingMoveFolder = input.text.toString()
-                mover.requestMove(uris)
+                onPicked(PhotoMover.relativePathFor(input.text.toString()))
             }
             .setNegativeButton(getString(android.R.string.cancel), null)
             .show()

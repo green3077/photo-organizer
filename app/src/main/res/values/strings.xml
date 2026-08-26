@@ -8,6 +8,7 @@
     <string name="title_location_organize">나라별 정리</string>
     <string name="pick_date">날짜 선택</string>
     <string name="delete">삭제</string>
+    <string name="delete_confirm_message">사진을 삭제할까요?</string>
     <string name="allow_access">사진 접근 허용하기</string>
     <string name="permission_rationale">매달 같은 날짜에 찍은 사진을 모아 보려면\n사진 접근 권한이 필요해요.</string>
     <string name="empty_recurring_title">아직 같은 날짜에 두 번 이상\n찍힌 사진이 없어요.</string>
@@ -47,6 +48,8 @@
     <string name="move_confirm">이동</string>
     <string name="move_done">%1$d장을 \'%2$s\' 폴더로 옮겼어요.</string>
     <string name="default_move_folder">정리한사진</string>
+    <string name="move_new_folder">새 폴더 만들기</string>
+    <string name="move_new_folder_hint">새 폴더 이름</string>
     <string name="select_photos_first">사진을 먼저 선택해주세요.</string>
     <string name="year_filter_all">전체</string>
 

@@ -1,14 +1,19 @@
 package com.green3077.photoorganizer
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.green3077.photoorganizer.data.PhotoDeleter
 import com.green3077.photoorganizer.data.PhotoDetailsLoader
+import com.green3077.photoorganizer.data.PhotoMover
 import com.green3077.photoorganizer.data.PhotoRepository
 import com.green3077.photoorganizer.data.StreakTracker
 import com.green3077.photoorganizer.databinding.ActivityPhotoViewerBinding
@@ -32,6 +37,14 @@ class PhotoViewerActivity : AppCompatActivity() {
         }
     private val deleter by lazy { PhotoDeleter(this, deleteLauncher) }
 
+    private var pendingMoveUri: Uri? = null
+    private var pendingMoveFolder: String = ""
+    private val moveLauncher =
+        registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
+            if (result.resultCode == RESULT_OK) onMoveConfirmed()
+        }
+    private val mover by lazy { PhotoMover(this, moveLauncher) }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityPhotoViewerBinding.inflate(layoutInflater)
@@ -40,7 +53,7 @@ class PhotoViewerActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         binding.toolbar.setNavigationOnClickListener { finish() }
         binding.btnDelete.setOnClickListener {
-            photos.getOrNull(binding.pager.currentItem)?.let { deleter.requestDelete(listOf(it.uri)) }
+            photos.getOrNull(binding.pager.currentItem)?.let { photo -> confirmDelete(photo) }
         }
         binding.btnShare.setOnClickListener {
             photos.getOrNull(binding.pager.currentItem)?.let { sharePhoto(it) }
@@ -77,6 +90,14 @@ class PhotoViewerActivity : AppCompatActivity() {
         }
     }
 
+    private fun confirmDelete(photo: Photo) {
+        MaterialAlertDialogBuilder(this)
+            .setMessage(getString(R.string.delete_confirm_message))
+            .setNegativeButton(getString(android.R.string.cancel), null)
+            .setPositiveButton(getString(R.string.delete)) { _, _ -> deleter.requestDelete(listOf(photo.uri)) }
+            .show()
+    }
+
     private fun sharePhoto(photo: Photo) {
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "image/*"
@@ -95,6 +116,10 @@ class PhotoViewerActivity : AppCompatActivity() {
                         showDetailInfo(photo)
                         true
                     }
+                    R.id.action_move -> {
+                        confirmMove(photo)
+                        true
+                    }
                     else -> false
                 }
             }
@@ -106,6 +131,51 @@ class PhotoViewerActivity : AppCompatActivity() {
             val details = detailsLoader.load(photo)
             PhotoDetailsSheet.show(this@PhotoViewerActivity, photo, details)
         }
+    }
+
+    private fun confirmMove(photo: Photo) {
+        lifecycleScope.launch {
+            val folders = mover.listExistingFolders()
+            showFolderPicker(folders) { relativePath ->
+                pendingMoveUri = photo.uri
+                pendingMoveFolder = relativePath
+                mover.requestMove(listOf(photo.uri))
+            }
+        }
+    }
+
+    private fun showFolderPicker(folders: List<String>, onPicked: (String) -> Unit) {
+        val labels = (listOf(getString(R.string.move_new_folder)) + folders.map { it.trimEnd('/') }).toTypedArray()
+        MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.move_dialog_title))
+            .setItems(labels) { _, which ->
+                if (which == 0) showNewFolderInput(onPicked) else onPicked(folders[which - 1])
+            }
+            .show()
+    }
+
+    private fun showNewFolderInput(onPicked: (String) -> Unit) {
+        val input = EditText(this).apply {
+            setText(PhotoMover.DEFAULT_FOLDER)
+            setSelection(text.length)
+            hint = getString(R.string.move_new_folder_hint)
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.move_dialog_title))
+            .setView(input)
+            .setPositiveButton(getString(R.string.move_confirm)) { _, _ ->
+                onPicked(PhotoMover.relativePathFor(input.text.toString()))
+            }
+            .setNegativeButton(getString(android.R.string.cancel), null)
+            .show()
+    }
+
+    private fun onMoveConfirmed() {
+        val uri = pendingMoveUri ?: return
+        mover.applyMove(listOf(uri), pendingMoveFolder)
+        StreakTracker.recordOrganizedToday(this)
+        val folderLabel = pendingMoveFolder.trimEnd('/').substringAfterLast('/').ifBlank { PhotoMover.DEFAULT_FOLDER }
+        Toast.makeText(this, getString(R.string.move_done, 1, folderLabel), Toast.LENGTH_SHORT).show()
     }
 
     /** 사진을 한 번 탭하면 툴바·하단 버튼을 숨기거나 다시 보여준다(다른 갤러리 앱과 동일한 몰입 보기). */
