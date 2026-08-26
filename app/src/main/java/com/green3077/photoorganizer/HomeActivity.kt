@@ -3,6 +3,7 @@ package com.green3077.photoorganizer
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
+import com.google.android.gms.ads.AdRequest
 import com.green3077.photoorganizer.databinding.ActivityHomeBinding
 
 /**
@@ -29,5 +30,22 @@ class HomeActivity : AppCompatActivity() {
         binding.cardCalendar.setOnClickListener {
             startActivity(Intent(this, CalendarActivity::class.java))
         }
+
+        binding.adView.loadAd(AdRequest.Builder().build())
+    }
+
+    override fun onResume() {
+        super.onResume()
+        binding.adView.resume()
+    }
+
+    override fun onPause() {
+        binding.adView.pause()
+        super.onPause()
+    }
+
+    override fun onDestroy() {
+        binding.adView.destroy()
+        super.onDestroy()
     }
 }
