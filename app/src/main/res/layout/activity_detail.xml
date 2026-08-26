@@ -24,7 +24,7 @@
         android:orientation="vertical"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- 이 월/일이 여러 연도에 걸쳐 있을 때만 나타나는 연도 필터 -->
+        <!-- 로드된 사진이 여러 연도에 걸쳐 있을 때만 나타나는 연도 필터 -->
         <com.google.android.material.chip.ChipGroup
             android:id="@+id/yearFilterGroup"
             android:layout_width="match_parent"

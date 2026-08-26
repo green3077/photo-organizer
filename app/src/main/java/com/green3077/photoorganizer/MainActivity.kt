@@ -25,7 +25,7 @@ import com.green3077.photoorganizer.ui.LocationGroupAdapter
 import com.green3077.photoorganizer.ui.MemoryGroupAdapter
 import kotlinx.coroutines.launch
 import java.time.Instant
-import java.time.MonthDay
+import java.time.LocalDate
 import java.time.ZoneOffset
 
 class MainActivity : AppCompatActivity() {
@@ -60,7 +60,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
-        groupAdapter = MemoryGroupAdapter { group -> openDetail(group.monthDay) }
+        groupAdapter = MemoryGroupAdapter { group -> openDetail(group.dayOfMonth) }
         locationAdapter = LocationGroupAdapter { group -> openLocationDetail(group) }
         binding.recyclerGroups.layoutManager = LinearLayoutManager(this)
         binding.recyclerGroups.adapter = groupAdapter
@@ -147,7 +147,7 @@ class MainActivity : AppCompatActivity() {
                     showPermissionGate()
                     return
                 }
-                val groups = repository.buildRecurringMemoryGroups(allPhotos, MonthDay.now())
+                val groups = repository.buildRecurringMemoryGroups(allPhotos, LocalDate.now())
                 groupAdapter.submit(groups)
                 showContent(groups.isNotEmpty(), R.string.empty_recurring_title, R.string.empty_recurring_subtitle)
             }
@@ -214,16 +214,15 @@ class MainActivity : AppCompatActivity() {
             .build()
         picker.addOnPositiveButtonClickListener { selection ->
             val date = Instant.ofEpochMilli(selection).atZone(ZoneOffset.UTC).toLocalDate()
-            openDetail(MonthDay.from(date))
+            openDetail(date.dayOfMonth)
         }
         picker.show(supportFragmentManager, "date_picker")
     }
 
-    private fun openDetail(monthDay: MonthDay) {
+    private fun openDetail(day: Int) {
         startActivity(
             Intent(this, DetailActivity::class.java).apply {
-                putExtra(DetailActivity.EXTRA_MONTH, monthDay.monthValue)
-                putExtra(DetailActivity.EXTRA_DAY, monthDay.dayOfMonth)
+                putExtra(DetailActivity.EXTRA_DAY, day)
             }
         )
     }

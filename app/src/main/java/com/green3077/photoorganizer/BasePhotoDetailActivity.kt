@@ -130,7 +130,7 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
         }
     }
 
-    /** 이 월/일이 여러 연도에 걸쳐 있을 때만 "전체/2024년/2022년…" 칩을 보여준다. */
+    /** 로드된 사진이 여러 연도에 걸쳐 있을 때만 "전체/2024년/2022년…" 칩을 보여준다. */
     private fun renderYearFilterChips(years: List<Int>) {
         val group = binding.yearFilterGroup
         if (years.size <= 1) {

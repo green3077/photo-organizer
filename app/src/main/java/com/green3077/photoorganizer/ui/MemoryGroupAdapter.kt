@@ -33,7 +33,7 @@ class MemoryGroupAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bind(group: MemoryGroup) {
             binding.image.load(group.coverPhoto.uri) { crossfade(true) }
-            binding.textDate.text = DateFormat.monthDayLabel(group.monthDay)
+            binding.textDate.text = DateFormat.dayOfMonthLabel(group.dayOfMonth)
             binding.textSummary.text = "${group.yearCount}개 연도 · 총 ${group.photoCount}장"
             binding.root.setOnClickListener { onClick(group) }
         }
