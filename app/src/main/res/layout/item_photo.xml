@@ -13,6 +13,16 @@
         android:scaleType="centerCrop"
         tools:ignore="ContentDescription" />
 
+    <ImageView
+        android:id="@+id/videoBadge"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_gravity="bottom|start"
+        android:layout_margin="4dp"
+        android:src="@drawable/ic_play_circle"
+        android:visibility="gone"
+        tools:ignore="ContentDescription" />
+
     <View
         android:id="@+id/checkOverlay"
         android:layout_width="match_parent"

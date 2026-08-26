@@ -24,6 +24,7 @@ import com.green3077.photoorganizer.databinding.ActivityDetailBinding
 import com.green3077.photoorganizer.model.Photo
 import com.green3077.photoorganizer.ui.DetailListAdapter
 import com.green3077.photoorganizer.ui.DragSelectTouchListener
+import com.green3077.photoorganizer.ui.FastScrollbar
 import com.green3077.photoorganizer.ui.PhotoViewerHolder
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -121,6 +122,8 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
             isSelected = { position -> adapter.photoAt(position)?.let { isPhotoSelected(it.id) } == true },
             setSelected = { position, selected -> adapter.photoAt(position)?.let { setSelected(it, selected) } }
         ).attach()
+
+        binding.fastScrollbar.attachTo(binding.recyclerPhotos)
     }
 
     override fun onResume() {
@@ -170,13 +173,18 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
         selectedIds.retainAll(photosByDate.values.flatten().map { it.id }.toSet())
         val sections = photosByDate.mapKeys { (date, _) -> sectionLabel(date) }
         adapter.submit(sections)
+        binding.fastScrollbar.refresh()
         binding.emptyState.visibility = if (photosByDate.isEmpty()) View.VISIBLE else View.GONE
         binding.recyclerPhotos.visibility = if (photosByDate.isEmpty()) View.GONE else View.VISIBLE
         updateSelectionUi()
     }
 
     private fun onPhotoClick(photo: Photo) {
-        val datePhotos = photosByDate[photo.dateTaken].orEmpty()
+        if (photo.isVideo) {
+            playVideo(photo)
+            return
+        }
+        val datePhotos = photosByDate[photo.dateTaken].orEmpty().filterNot { it.isVideo }
         PhotoViewerHolder.photos = datePhotos
         val index = datePhotos.indexOfFirst { it.id == photo.id }.coerceAtLeast(0)
         startActivity(
@@ -185,6 +193,16 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
                 putExtra(PhotoViewerActivity.EXTRA_PHOTO_IDS, datePhotos.map { it.id }.toLongArray())
             }
         )
+    }
+
+    /** 인앱 사진 뷰어는 정지 이미지만 다루므로, 동영상은 시스템 플레이어로 넘긴다. */
+    private fun playVideo(photo: Photo) {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            setDataAndType(photo.uri, "video/*")
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        runCatching { startActivity(intent) }
+            .onFailure { Toast.makeText(this, R.string.no_video_player, Toast.LENGTH_SHORT).show() }
     }
 
     private fun isPhotoSelected(id: Long): Boolean = selectedIds.contains(id)

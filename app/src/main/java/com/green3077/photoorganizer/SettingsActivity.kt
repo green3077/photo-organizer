@@ -6,17 +6,12 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.google.android.material.timepicker.MaterialTimePicker
-import com.google.android.material.timepicker.TimeFormat
-import com.green3077.photoorganizer.data.ChallengeSettings
 import com.green3077.photoorganizer.databinding.ActivitySettingsBinding
-import com.green3077.photoorganizer.notification.WorkScheduler
 import com.green3077.photoorganizer.update.UpdateCheckResult
 import com.green3077.photoorganizer.update.UpdateChecker
 import com.green3077.photoorganizer.update.UpdateDownloader
 import com.green3077.photoorganizer.update.UpdateInfo
 import kotlinx.coroutines.launch
-import java.time.LocalTime
 
 class SettingsActivity : AppCompatActivity() {
 
@@ -30,47 +25,8 @@ class SettingsActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         binding.toolbar.setNavigationOnClickListener { finish() }
 
-        binding.switchEnabled.isChecked = ChallengeSettings.isEnabled(this)
-        updateTimeRowEnabled()
-        updateTimeLabel()
-
-        binding.switchEnabled.setOnCheckedChangeListener { _, checked ->
-            ChallengeSettings.setEnabled(this, checked)
-            updateTimeRowEnabled()
-            WorkScheduler.applySettings(this)
-        }
-
-        binding.rowTime.setOnClickListener { showTimePicker() }
-
         binding.textCurrentVersion.text = getString(R.string.settings_current_version, BuildConfig.VERSION_NAME)
         binding.rowCheckUpdate.setOnClickListener { checkForUpdate() }
-    }
-
-    private fun updateTimeRowEnabled() {
-        val enabled = ChallengeSettings.isEnabled(this)
-        binding.rowTime.isEnabled = enabled
-        binding.rowTime.alpha = if (enabled) 1f else 0.4f
-    }
-
-    private fun updateTimeLabel() {
-        val time = ChallengeSettings.notifyTime(this)
-        binding.textTimeValue.text = "%02d:%02d".format(time.hour, time.minute)
-    }
-
-    private fun showTimePicker() {
-        val current = ChallengeSettings.notifyTime(this)
-        val picker = MaterialTimePicker.Builder()
-            .setTimeFormat(TimeFormat.CLOCK_24H)
-            .setHour(current.hour)
-            .setMinute(current.minute)
-            .setTitleText(getString(R.string.settings_time_label))
-            .build()
-        picker.addOnPositiveButtonClickListener {
-            ChallengeSettings.setNotifyTime(this, LocalTime.of(picker.hour, picker.minute))
-            updateTimeLabel()
-            WorkScheduler.applySettings(this)
-        }
-        picker.show(supportFragmentManager, "time_picker")
     }
 
     private fun checkForUpdate() {

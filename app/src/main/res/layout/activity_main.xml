@@ -56,6 +56,11 @@
                 android:paddingBottom="24dp"
                 android:visibility="gone" />
 
+            <com.green3077.photoorganizer.ui.FastScrollbar
+                android:id="@+id/fastScrollbar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
+
             <LinearLayout
                 android:id="@+id/emptyState"
                 android:layout_width="match_parent"

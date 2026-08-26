@@ -11,8 +11,8 @@ android {
         applicationId = "com.green3077.photoorganizer"
         minSdk = 30
         targetSdk = 34
-        versionCode = 4
-        versionName = "1.3"
+        versionCode = 5
+        versionName = "1.4"
     }
 
     signingConfigs {
@@ -63,8 +63,8 @@ dependencies {
     implementation("androidx.viewpager2:viewpager2:1.1.0")
     implementation("androidx.swiperefreshlayout:swiperefreshlayout:1.1.0")
     implementation("androidx.coordinatorlayout:coordinatorlayout:1.2.0")
-    implementation("androidx.work:work-runtime-ktx:2.9.1")
     implementation("io.coil-kt:coil:2.6.0")
+    implementation("io.coil-kt:coil-video:2.6.0")
     implementation("androidx.exifinterface:exifinterface:1.3.7")
 
     testImplementation("junit:junit:4.13.2")

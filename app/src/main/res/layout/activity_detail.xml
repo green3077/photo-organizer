@@ -48,6 +48,12 @@
                 android:clipToPadding="false"
                 android:paddingBottom="88dp" />
 
+            <com.green3077.photoorganizer.ui.FastScrollbar
+                android:id="@+id/fastScrollbar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="88dp" />
+
             <TextView
                 android:id="@+id/emptyState"
                 android:layout_width="match_parent"

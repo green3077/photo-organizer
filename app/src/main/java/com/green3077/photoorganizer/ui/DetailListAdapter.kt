@@ -80,6 +80,7 @@ class DetailListAdapter(
         RecyclerView.ViewHolder(binding.root) {
         fun bind(photo: Photo) {
             binding.image.load(photo.uri) { crossfade(true) }
+            binding.videoBadge.visibility = if (photo.isVideo) View.VISIBLE else View.GONE
             val selected = isSelected(photo.id)
             binding.checkOverlay.visibility = if (selected) View.VISIBLE else View.GONE
             binding.checkIcon.setImageResource(
