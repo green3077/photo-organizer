@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
@@ -153,22 +154,28 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
 
     private fun updateSelectionUi() {
         val hasSelection = selectedIds.isNotEmpty()
-        binding.toolbar.menu.findItem(R.id.action_delete)?.isVisible = hasSelection
-        binding.toolbar.menu.findItem(R.id.action_share)?.isVisible = hasSelection
-        binding.toolbar.menu.findItem(R.id.action_move)?.isVisible = hasSelection
         binding.toolbar.title = if (hasSelection) getString(R.string.selected_count, selectedIds.size) else screenTitle()
     }
 
     private fun selectedUris(): List<Uri> =
         photosByDate.values.flatten().filter { selectedIds.contains(it.id) }.map { it.uri }
 
+    private fun requireSelection(): List<Uri>? {
+        val uris = selectedUris()
+        if (uris.isEmpty()) {
+            Toast.makeText(this, R.string.select_photos_first, Toast.LENGTH_SHORT).show()
+            return null
+        }
+        return uris
+    }
+
     private fun confirmDelete() {
-        deleter.requestDelete(selectedUris())
+        val uris = requireSelection() ?: return
+        deleter.requestDelete(uris)
     }
 
     private fun confirmShare() {
-        val uris = selectedUris()
-        if (uris.isEmpty()) return
+        val uris = requireSelection() ?: return
         val intent = Intent(Intent.ACTION_SEND_MULTIPLE).apply {
             type = "image/*"
             putParcelableArrayListExtra(Intent.EXTRA_STREAM, ArrayList(uris))
@@ -178,8 +185,7 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
     }
 
     private fun confirmMove() {
-        val uris = selectedUris()
-        if (uris.isEmpty()) return
+        val uris = requireSelection() ?: return
         val input = EditText(this).apply {
             setText(PhotoMover.DEFAULT_FOLDER)
             setSelection(text.length)
