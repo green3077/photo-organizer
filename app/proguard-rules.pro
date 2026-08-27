@@ -4,3 +4,9 @@
 -keep class com.green3077.photoorganizer.notification.TrashPurgeWorker {
     <init>(android.content.Context, androidx.work.WorkerParameters);
 }
+
+# play-services-ads가 컴파일 시점 Android SDK보다 최신 API(API 35+)의 플랫폼 클래스를
+# 조건부로 참조해 R8이 "missing class"로 잡아낸다. 실제 기기에서는 리플렉션으로 존재
+# 여부를 확인하고 쓰므로 경고만 무시하면 된다(AGP가 생성한 missing_rules.txt 그대로).
+-dontwarn android.media.LoudnessCodecController
+-dontwarn android.media.LoudnessCodecController$OnLoudnessCodecUpdateListener
