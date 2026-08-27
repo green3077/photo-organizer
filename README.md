@@ -4,6 +4,7 @@
 
 ## 주요 기능
 
+- **스플래시 화면**: 앱을 실행하면 로고 화면이 3초 정도 보였다가 자동으로 홈 화면으로 넘어갑니다.
 - **홈 화면**: 앱을 열면 바로 사진 목록이 아니라 "사진정리 챌린지"와 "날짜별 정리" 두 메뉴만
   심플하게 보여줍니다. 오른쪽 위에는 휴지통 아이콘과 톱니바퀴(챌린지 알림 설정)가 있습니다.
 - **사진정리 챌린지**: 정리하고 싶은 연도와 월을 한 번 고르면 그 달 1일부터 하루씩 순서대로
@@ -68,16 +69,17 @@
 ## 화면 구조
 
 ```
-HomeActivity (런처)
-├─ ChallengeActivity   — 사진정리 챌린지 (연도/월 선택 → 하루씩 진행)
-│   └─ PhotoViewerActivity
-└─ MainActivity         — 날짜별 정리 (날짜별/나라별 탭)
-    ├─ DetailActivity        — 특정 며칠(월 무관)의 촬영일별 사진
-    ├─ LocationDetailActivity — 특정 나라의 날짜별 사진
-    ├─ YearDetailActivity     — 특정 연도의 날짜별 사진
-    └─ PhotoViewerActivity
-TrashActivity — 휴지통 (Home 우측 위 아이콘에서 진입, 복원/완전삭제/휴지통 비우기)
-SettingsActivity — 챌린지 알림 on/off·시간 (Home 우측 위 톱니바퀴에서 진입)
+SplashActivity (런처) — 로고 화면 3초 후 HomeActivity로 자동 이동
+└─ HomeActivity
+    ├─ ChallengeActivity   — 사진정리 챌린지 (연도/월 선택 → 하루씩 진행)
+    │   └─ PhotoViewerActivity
+    ├─ MainActivity         — 날짜별 정리 (날짜별/나라별 탭)
+    │   ├─ DetailActivity        — 특정 며칠(월 무관)의 촬영일별 사진
+    │   ├─ LocationDetailActivity — 특정 나라의 날짜별 사진
+    │   ├─ YearDetailActivity     — 특정 연도의 날짜별 사진
+    │   └─ PhotoViewerActivity
+    ├─ TrashActivity — 휴지통 (Home 우측 위 아이콘에서 진입, 복원/완전삭제/휴지통 비우기)
+    └─ SettingsActivity — 챌린지 알림 on/off·시간 (Home 우측 위 톱니바퀴에서 진입)
 ```
 
 ## 빌드 방법

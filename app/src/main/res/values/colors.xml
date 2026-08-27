@@ -16,4 +16,9 @@
     <color name="card_challenge_end">#3F3D9E</color>
     <color name="card_date_start">#34D1BF</color>
     <color name="card_date_end">#1E9E90</color>
+
+    <!-- 스플래시 화면 -->
+    <color name="splash_gradient_start">#2A2166</color>
+    <color name="splash_gradient_end">#0B0A1E</color>
+    <color name="splash_subtitle">#C9C4EE</color>
 </resources>

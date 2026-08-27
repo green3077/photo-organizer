@@ -71,4 +71,9 @@
     <string name="trash_reminder_body">14일이 지난 사진 %1$d장이 휴지통에 있어요. 앱을 열어 정리해주세요.</string>
     <string name="trash_auto_purging">14일이 지난 사진 %1$d장을 완전삭제합니다.</string>
     <string name="trash_permission_denied">사진 접근 권한이 필요해요.</string>
+
+    <string name="splash_tagline">사진 정리를 스마트하게</string>
+    <string name="splash_feature_date">날짜별\n사진 정리</string>
+    <string name="splash_feature_location">나라별\n사진 정리</string>
+    <string name="splash_feature_trash">휴지통</string>
 </resources>
