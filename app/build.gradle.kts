@@ -67,6 +67,7 @@ dependencies {
     implementation("io.coil-kt:coil-video:2.6.0")
     implementation("com.google.android.gms:play-services-ads:23.6.0")
     implementation("androidx.exifinterface:exifinterface:1.3.7")
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
 
     testImplementation("junit:junit:4.13.2")
 }
