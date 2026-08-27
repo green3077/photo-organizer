@@ -16,10 +16,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.green3077.photoorganizer.data.PhotoDeleter
 import com.green3077.photoorganizer.data.PhotoMover
 import com.green3077.photoorganizer.data.PhotoRepository
+import com.green3077.photoorganizer.data.PhotoTrasher
 import com.green3077.photoorganizer.data.StreakTracker
+import com.green3077.photoorganizer.data.TrashTracker
 import com.green3077.photoorganizer.databinding.ActivityDetailBinding
 import com.green3077.photoorganizer.model.Photo
 import com.green3077.photoorganizer.ui.DetailListAdapter
@@ -31,6 +32,8 @@ import java.time.LocalDate
  * "사진을 날짜별 섹션으로 묶어 그리드로 보여주고, 선택한 뒤 삭제/공유/이동한다"는
  * DetailActivity / LocationDetailActivity / YearDetailActivity 공통 골격.
  * 무엇을(어떤 조건으로) 불러올지, 섹션 라벨을 뭐라 붙일지만 하위 클래스가 정한다.
+ * "삭제"는 실제로는 완전삭제가 아니라 휴지통으로 보내는 것이며([PhotoTrasher]),
+ * 14일 뒤 자동 완전삭제되거나 [TrashActivity]에서 직접 복원/완전삭제할 수 있다.
  *
  * 삭제/공유/이동은 툴바 메뉴 아이콘이 아니라 화면 아래 항상 고정된 버튼으로 뒀다 —
  * 툴바/액션바 메뉴는 기기·테마에 따라 표시 방식이 달라질 여지가 있어서, 항상
@@ -48,16 +51,18 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
     private val selectedIds = mutableSetOf<Long>()
     private var pendingMoveUris: List<Uri> = emptyList()
     private var pendingMoveFolder: String = ""
+    private var pendingTrashIds: List<Long> = emptyList()
 
-    private val deleteLauncher =
+    private val trashLauncher =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
+                TrashTracker.recordTrashed(this, pendingTrashIds)
                 StreakTracker.recordOrganizedToday(this)
                 selectedIds.clear()
                 loadPhotos()
             }
         }
-    private val deleter by lazy { PhotoDeleter(this, deleteLauncher) }
+    private val trasher by lazy { PhotoTrasher(this, trashLauncher) }
 
     private val moveLauncher: ActivityResultLauncher<IntentSenderRequest> =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
@@ -214,7 +219,8 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
 
     private fun confirmDelete() {
         val uris = requireSelection() ?: return
-        deleter.requestDelete(uris)
+        pendingTrashIds = photosByDate.values.flatten().filter { selectedIds.contains(it.id) }.map { it.id }
+        trasher.requestTrash(uris)
     }
 
     private fun confirmShare() {

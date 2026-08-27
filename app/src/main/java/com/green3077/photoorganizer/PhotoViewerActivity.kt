@@ -5,9 +5,10 @@ import android.os.Bundle
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.green3077.photoorganizer.data.PhotoDeleter
 import com.green3077.photoorganizer.data.PhotoRepository
+import com.green3077.photoorganizer.data.PhotoTrasher
 import com.green3077.photoorganizer.data.StreakTracker
+import com.green3077.photoorganizer.data.TrashTracker
 import com.green3077.photoorganizer.databinding.ActivityPhotoViewerBinding
 import com.green3077.photoorganizer.model.Photo
 import com.green3077.photoorganizer.ui.PhotoPagerAdapter
@@ -19,12 +20,13 @@ class PhotoViewerActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPhotoViewerBinding
     private val repository by lazy { PhotoRepository(this) }
     private var photos: List<Photo> = emptyList()
+    private var pendingTrashId: Long = -1L
 
-    private val deleteLauncher =
+    private val trashLauncher =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) onDeleteConfirmed()
         }
-    private val deleter by lazy { PhotoDeleter(this, deleteLauncher) }
+    private val trasher by lazy { PhotoTrasher(this, trashLauncher) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +36,10 @@ class PhotoViewerActivity : AppCompatActivity() {
         setSupportActionBar(binding.toolbar)
         binding.toolbar.setNavigationOnClickListener { finish() }
         binding.btnDelete.setOnClickListener {
-            photos.getOrNull(binding.pager.currentItem)?.let { deleter.requestDelete(listOf(it.uri)) }
+            photos.getOrNull(binding.pager.currentItem)?.let {
+                pendingTrashId = it.id
+                trasher.requestTrash(listOf(it.uri))
+            }
         }
         binding.btnShare.setOnClickListener {
             photos.getOrNull(binding.pager.currentItem)?.let { sharePhoto(it) }
@@ -85,6 +90,7 @@ class PhotoViewerActivity : AppCompatActivity() {
     }
 
     private fun onDeleteConfirmed() {
+        if (pendingTrashId != -1L) TrashTracker.recordTrashed(this, listOf(pendingTrashId))
         StreakTracker.recordOrganizedToday(this)
         val current = binding.pager.currentItem
         photos = photos.filterIndexed { index, _ -> index != current }

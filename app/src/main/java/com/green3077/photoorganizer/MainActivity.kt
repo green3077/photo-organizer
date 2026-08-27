@@ -20,6 +20,7 @@ import com.green3077.photoorganizer.data.StreakTracker
 import com.green3077.photoorganizer.databinding.ActivityMainBinding
 import com.green3077.photoorganizer.model.LocationGroup
 import com.green3077.photoorganizer.model.Photo
+import com.green3077.photoorganizer.notification.TrashWorkScheduler
 import com.green3077.photoorganizer.notification.WorkScheduler
 import com.green3077.photoorganizer.ui.LocationGroupAdapter
 import com.green3077.photoorganizer.ui.MemoryGroupAdapter
@@ -120,6 +121,7 @@ class MainActivity : AppCompatActivity() {
     private fun onMediaPermissionGranted() {
         loadPhotos()
         WorkScheduler.scheduleIfNeeded(this)
+        TrashWorkScheduler.scheduleIfNeeded(this)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
             PackageManager.PERMISSION_GRANTED

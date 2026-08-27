@@ -1,7 +1,11 @@
 package com.green3077.photoorganizer.data
 
+import android.content.ContentResolver
 import android.content.ContentUris
 import android.content.Context
+import android.database.Cursor
+import android.net.Uri
+import android.os.Bundle
 import android.provider.MediaStore
 import com.green3077.photoorganizer.model.MemoryGroup
 import com.green3077.photoorganizer.model.Photo
@@ -16,6 +20,22 @@ import java.time.temporal.ChronoUnit
 class PhotoRepository(private val context: Context) {
 
     suspend fun loadAllPhotos(): List<Photo> = withContext(Dispatchers.IO) {
+        val queryArgs = Bundle().apply {
+            putString(ContentResolver.QUERY_ARG_SQL_SORT_ORDER, "${MediaStore.Images.Media.DATE_TAKEN} DESC")
+        }
+        queryPhotos(queryArgs)
+    }
+
+    /** 휴지통(시스템 IS_TRASHED)으로 보내진 사진만 불러온다. */
+    suspend fun loadTrashedPhotos(): List<Photo> = withContext(Dispatchers.IO) {
+        val queryArgs = Bundle().apply {
+            putInt(MediaStore.QUERY_ARG_MATCH_TRASHED, MediaStore.MATCH_ONLY)
+            putString(ContentResolver.QUERY_ARG_SQL_SORT_ORDER, "${MediaStore.Images.Media.DATE_TAKEN} DESC")
+        }
+        queryPhotos(queryArgs)
+    }
+
+    private fun queryPhotos(queryArgs: Bundle): List<Photo> {
         val photos = mutableListOf<Photo>()
         val projection = arrayOf(
             MediaStore.Images.Media._ID,
@@ -23,34 +43,36 @@ class PhotoRepository(private val context: Context) {
             MediaStore.Images.Media.DATE_ADDED,
             MediaStore.Images.Media.DISPLAY_NAME
         )
-        val sortOrder = "${MediaStore.Images.Media.DATE_TAKEN} DESC"
         val zone = ZoneId.systemDefault()
 
         context.contentResolver.query(
             MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
             projection,
-            null,
-            null,
-            sortOrder
-        )?.use { cursor ->
-            val idCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
-            val dateTakenCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN)
-            val dateAddedCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
-            val nameCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
+            queryArgs,
+            null
+        )?.use { cursor -> photos.addAll(readPhotos(cursor, zone)) }
+        return photos
+    }
 
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(idCol)
-                val dateTakenMillis = cursor.getLong(dateTakenCol)
-                val dateAddedSeconds = cursor.getLong(dateAddedCol)
-                val millis = if (dateTakenMillis > 0) dateTakenMillis else dateAddedSeconds * 1000
-                if (millis <= 0) continue
+    private fun readPhotos(cursor: Cursor, zone: ZoneId): List<Photo> {
+        val photos = mutableListOf<Photo>()
+        val idCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media._ID)
+        val dateTakenCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_TAKEN)
+        val dateAddedCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DATE_ADDED)
+        val nameCol = cursor.getColumnIndexOrThrow(MediaStore.Images.Media.DISPLAY_NAME)
 
-                val date = Instant.ofEpochMilli(millis).atZone(zone).toLocalDate()
-                val uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
-                photos.add(Photo(id, uri, date, nameCol.let { cursor.getString(it) } ?: ""))
-            }
+        while (cursor.moveToNext()) {
+            val id = cursor.getLong(idCol)
+            val dateTakenMillis = cursor.getLong(dateTakenCol)
+            val dateAddedSeconds = cursor.getLong(dateAddedCol)
+            val millis = if (dateTakenMillis > 0) dateTakenMillis else dateAddedSeconds * 1000
+            if (millis <= 0) continue
+
+            val date = Instant.ofEpochMilli(millis).atZone(zone).toLocalDate()
+            val uri: Uri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id)
+            photos.add(Photo(id, uri, date, cursor.getString(nameCol) ?: ""))
         }
-        photos
+        return photos
     }
 
     /**

@@ -57,4 +57,18 @@
     <string name="challenge_done_title">🎉 이 달의 챌린지를 모두 완료했어요!</string>
     <string name="pick_new_month">다른 연도·월 선택하기</string>
     <string name="no_photos_for_challenge">사진이 있는 연도가 없어요.</string>
+
+    <string name="title_trash">휴지통</string>
+    <string name="trash_subtitle">%1$d장 보관 중</string>
+    <string name="empty_trash">휴지통이 비어있어요.</string>
+    <string name="empty_trash_action">휴지통 비우기</string>
+    <string name="restore">복원</string>
+    <string name="permanent_delete">완전삭제</string>
+    <string name="confirm_empty_trash_title">휴지통 비우기</string>
+    <string name="confirm_empty_trash_message">휴지통에 있는 사진 %1$d장을 모두 완전삭제할까요?\n삭제하면 되돌릴 수 없습니다.</string>
+    <string name="confirm_permanent_delete_message">선택한 사진 %1$d장을 완전삭제할까요?\n삭제하면 되돌릴 수 없습니다.</string>
+    <string name="trash_reminder_title">휴지통 정리가 필요해요 🗑️</string>
+    <string name="trash_reminder_body">14일이 지난 사진 %1$d장이 휴지통에 있어요. 앱을 열어 정리해주세요.</string>
+    <string name="trash_auto_purging">14일이 지난 사진 %1$d장을 완전삭제합니다.</string>
+    <string name="trash_permission_denied">사진 접근 권한이 필요해요.</string>
 </resources>

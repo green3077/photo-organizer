@@ -14,4 +14,7 @@ object DateFormat {
     }
 
     fun fullDateLabel(date: LocalDate): String = "${date.year}년 ${date.monthValue}월 ${date.dayOfMonth}일"
+
+    fun trashCountdownLabel(daysLeft: Int): String =
+        if (daysLeft <= 0) "오늘 완전삭제" else "${daysLeft}일 후 완전삭제"
 }

@@ -18,12 +18,14 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.green3077.photoorganizer.data.ChallengeSettings
-import com.green3077.photoorganizer.data.PhotoDeleter
 import com.green3077.photoorganizer.data.PhotoMover
 import com.green3077.photoorganizer.data.PhotoRepository
+import com.green3077.photoorganizer.data.PhotoTrasher
 import com.green3077.photoorganizer.data.StreakTracker
+import com.green3077.photoorganizer.data.TrashTracker
 import com.green3077.photoorganizer.databinding.ActivityChallengeBinding
 import com.green3077.photoorganizer.model.Photo
+import com.green3077.photoorganizer.notification.TrashWorkScheduler
 import com.green3077.photoorganizer.notification.WorkScheduler
 import com.green3077.photoorganizer.ui.DetailListAdapter
 import com.green3077.photoorganizer.ui.PhotoViewerHolder
@@ -46,6 +48,7 @@ class ChallengeActivity : AppCompatActivity() {
     private val selectedIds = mutableSetOf<Long>()
     private var pendingMoveUris: List<Uri> = emptyList()
     private var pendingMoveFolder: String = ""
+    private var pendingTrashIds: List<Long> = emptyList()
     private var pickedYear: Int? = null
     private var pickedMonth: Int? = null
 
@@ -54,15 +57,16 @@ class ChallengeActivity : AppCompatActivity() {
             if (granted) onPermissionGranted() else showPermissionGate()
         }
 
-    private val deleteLauncher =
+    private val trashLauncher =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
+                TrashTracker.recordTrashed(this, pendingTrashIds)
                 StreakTracker.recordOrganizedToday(this)
                 selectedIds.clear()
                 loadCurrentDatePhotos()
             }
         }
-    private val deleter by lazy { PhotoDeleter(this, deleteLauncher) }
+    private val trasher by lazy { PhotoTrasher(this, trashLauncher) }
 
     private val moveLauncher: ActivityResultLauncher<IntentSenderRequest> =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
@@ -124,6 +128,7 @@ class ChallengeActivity : AppCompatActivity() {
 
     private fun onPermissionGranted() {
         WorkScheduler.scheduleIfNeeded(this)
+        TrashWorkScheduler.scheduleIfNeeded(this)
         hideAllSections()
         refreshState()
     }
@@ -276,7 +281,8 @@ class ChallengeActivity : AppCompatActivity() {
 
     private fun confirmDelete() {
         val uris = requireSelection() ?: return
-        deleter.requestDelete(uris)
+        pendingTrashIds = currentDatePhotos.filter { selectedIds.contains(it.id) }.map { it.id }
+        trasher.requestTrash(uris)
     }
 
     private fun confirmShare() {
