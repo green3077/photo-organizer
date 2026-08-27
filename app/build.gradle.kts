@@ -1,6 +1,17 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("org.jetbrains.kotlin.android")
+}
+
+// Play Store 업로드용 release 서명 정보. keystore.properties.example을 참고해 로컬에
+// keystore.properties를 만들면(git에는 커밋하지 않음) release 빌드에 서명이 적용된다.
+// 없으면 release 서명 없이 넘어가고 debug 빌드는 그대로 동작한다.
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val hasReleaseSigning = keystorePropertiesFile.exists()
+val keystoreProperties = Properties().apply {
+    if (hasReleaseSigning) load(keystorePropertiesFile.inputStream())
 }
 
 android {
@@ -24,6 +35,14 @@ android {
             keyAlias = "androiddebugkey"
             keyPassword = "android"
         }
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(keystoreProperties.getProperty("storeFile"))
+                storePassword = keystoreProperties.getProperty("storePassword")
+                keyAlias = keystoreProperties.getProperty("keyAlias")
+                keyPassword = keystoreProperties.getProperty("keyPassword")
+            }
+        }
     }
 
     buildTypes {
@@ -31,8 +50,12 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            if (hasReleaseSigning) {
+                signingConfig = signingConfigs.getByName("release")
+            }
         }
     }
 
@@ -47,7 +70,6 @@ android {
 
     buildFeatures {
         viewBinding = true
-        buildConfig = true
     }
 }
 
