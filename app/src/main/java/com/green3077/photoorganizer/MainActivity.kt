@@ -19,6 +19,7 @@ import com.green3077.photoorganizer.data.PhotoRepository
 import com.green3077.photoorganizer.data.StreakTracker
 import com.green3077.photoorganizer.databinding.ActivityMainBinding
 import com.green3077.photoorganizer.model.Photo
+import com.green3077.photoorganizer.notification.TrashWorkScheduler
 import com.green3077.photoorganizer.ui.GroupViewMode
 import com.green3077.photoorganizer.ui.MemoryGroupAdapter
 import kotlinx.coroutines.launch
@@ -38,6 +39,8 @@ class MainActivity : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) {
             if (hasPermission()) onMediaPermissionGranted() else showPermissionGate()
         }
+    private val requestNotificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,6 +102,13 @@ class MainActivity : AppCompatActivity() {
     private fun onMediaPermissionGranted() {
         loadPhotos()
         requestMissingSupplementaryPermissions()
+        TrashWorkScheduler.scheduleIfNeeded(this)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            requestNotificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+        }
     }
 
     /**

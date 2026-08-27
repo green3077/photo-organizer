@@ -34,4 +34,7 @@ object DateFormat {
         val seconds = totalSeconds % 60
         return "%d:%02d".format(minutes, seconds)
     }
+
+    fun trashCountdownLabel(daysLeft: Int): String =
+        if (daysLeft <= 0) "오늘 완전삭제" else "${daysLeft}일 후 완전삭제"
 }

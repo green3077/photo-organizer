@@ -23,6 +23,9 @@ class HomeActivity : AppCompatActivity() {
         binding.btnSettings.setOnClickListener {
             startActivity(Intent(this, SettingsActivity::class.java))
         }
+        binding.btnTrash.setOnClickListener {
+            startActivity(Intent(this, TrashActivity::class.java))
+        }
         binding.cardDateOrganize.setOnClickListener {
             startActivity(Intent(this, DateOrganizeChooserActivity::class.java))
         }

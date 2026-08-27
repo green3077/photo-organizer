@@ -3,6 +3,7 @@ package com.green3077.photoorganizer.data
 import android.content.ContentUris
 import android.content.Context
 import android.net.Uri
+import android.os.Bundle
 import android.provider.MediaStore
 import com.green3077.photoorganizer.model.MemoryGroup
 import com.green3077.photoorganizer.model.MonthGroup
@@ -21,7 +22,14 @@ class PhotoRepository(private val context: Context) {
         photos.sortedByDescending { it.dateTaken }
     }
 
-    private fun queryMedia(collection: Uri, isVideo: Boolean): List<Photo> {
+    /** 휴지통(시스템 IS_TRASHED)으로 보내진 사진/동영상만 불러온다. */
+    suspend fun loadTrashedPhotos(): List<Photo> = withContext(Dispatchers.IO) {
+        val photos = queryMedia(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, isVideo = false, trashedOnly = true) +
+            queryMedia(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, isVideo = true, trashedOnly = true)
+        photos.sortedByDescending { it.dateTaken }
+    }
+
+    private fun queryMedia(collection: Uri, isVideo: Boolean, trashedOnly: Boolean = false): List<Photo> {
         val photos = mutableListOf<Photo>()
         val projection = arrayOf(
             MediaStore.MediaColumns._ID,
@@ -32,22 +40,32 @@ class PhotoRepository(private val context: Context) {
         val sortOrder = "${MediaStore.MediaColumns.DATE_TAKEN} DESC"
         val zone = ZoneId.systemDefault()
 
-        context.contentResolver.query(collection, projection, null, null, sortOrder)?.use { cursor ->
-            val idCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
-            val dateTakenCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_TAKEN)
-            val dateAddedCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED)
-            val nameCol = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
+        val cursor = if (trashedOnly) {
+            val queryArgs = Bundle().apply {
+                putInt(MediaStore.QUERY_ARG_MATCH_TRASHED, MediaStore.MATCH_ONLY)
+                putString(android.content.ContentResolver.QUERY_ARG_SQL_SORT_ORDER, sortOrder)
+            }
+            context.contentResolver.query(collection, projection, queryArgs, null)
+        } else {
+            context.contentResolver.query(collection, projection, null, null, sortOrder)
+        }
 
-            while (cursor.moveToNext()) {
-                val id = cursor.getLong(idCol)
-                val dateTakenMillis = cursor.getLong(dateTakenCol)
-                val dateAddedSeconds = cursor.getLong(dateAddedCol)
+        cursor?.use {
+            val idCol = it.getColumnIndexOrThrow(MediaStore.MediaColumns._ID)
+            val dateTakenCol = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_TAKEN)
+            val dateAddedCol = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DATE_ADDED)
+            val nameCol = it.getColumnIndexOrThrow(MediaStore.MediaColumns.DISPLAY_NAME)
+
+            while (it.moveToNext()) {
+                val id = it.getLong(idCol)
+                val dateTakenMillis = it.getLong(dateTakenCol)
+                val dateAddedSeconds = it.getLong(dateAddedCol)
                 val millis = if (dateTakenMillis > 0) dateTakenMillis else dateAddedSeconds * 1000
                 if (millis <= 0) continue
 
                 val date = Instant.ofEpochMilli(millis).atZone(zone).toLocalDate()
                 val uri = ContentUris.withAppendedId(collection, id)
-                photos.add(Photo(id, uri, date, cursor.getString(nameCol) ?: "", isVideo))
+                photos.add(Photo(id, uri, date, it.getString(nameCol) ?: "", isVideo))
             }
         }
         return photos

@@ -16,10 +16,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.green3077.photoorganizer.data.PhotoDeleter
 import com.green3077.photoorganizer.data.PhotoMover
 import com.green3077.photoorganizer.data.PhotoRepository
+import com.green3077.photoorganizer.data.PhotoTrasher
 import com.green3077.photoorganizer.data.StreakTracker
+import com.green3077.photoorganizer.data.TrashTracker
 import com.green3077.photoorganizer.databinding.ActivityDetailBinding
 import com.green3077.photoorganizer.model.Photo
 import com.green3077.photoorganizer.ui.DetailListAdapter
@@ -50,16 +51,18 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
     private val selectedIds = mutableSetOf<Long>()
     private var pendingMoveUris: List<Uri> = emptyList()
     private var pendingMoveFolder: String = ""
+    private var pendingTrashIds: List<Long> = emptyList()
 
-    private val deleteLauncher =
+    private val trashLauncher =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) {
+                TrashTracker.recordTrashed(this, pendingTrashIds)
                 StreakTracker.recordOrganizedToday(this)
                 selectedIds.clear()
                 loadPhotos()
             }
         }
-    private val deleter by lazy { PhotoDeleter(this, deleteLauncher) }
+    private val trasher by lazy { PhotoTrasher(this, trashLauncher) }
 
     private val moveLauncher: ActivityResultLauncher<IntentSenderRequest> =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
@@ -263,7 +266,10 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
         MaterialAlertDialogBuilder(this)
             .setMessage(getString(R.string.delete_confirm_message))
             .setNegativeButton(getString(android.R.string.cancel), null)
-            .setPositiveButton(getString(R.string.delete)) { _, _ -> deleter.requestDelete(uris) }
+            .setPositiveButton(getString(R.string.delete)) { _, _ ->
+                pendingTrashIds = photosByDate.values.flatten().filter { selectedIds.contains(it.id) }.map { it.id }
+                trasher.requestTrash(uris)
+            }
             .show()
     }
 

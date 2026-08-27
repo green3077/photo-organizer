@@ -11,11 +11,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.green3077.photoorganizer.data.PhotoDeleter
 import com.green3077.photoorganizer.data.PhotoDetailsLoader
 import com.green3077.photoorganizer.data.PhotoMover
 import com.green3077.photoorganizer.data.PhotoRepository
+import com.green3077.photoorganizer.data.PhotoTrasher
 import com.green3077.photoorganizer.data.StreakTracker
+import com.green3077.photoorganizer.data.TrashTracker
 import com.green3077.photoorganizer.databinding.ActivityPhotoViewerBinding
 import com.green3077.photoorganizer.model.Photo
 import com.green3077.photoorganizer.ui.PhotoDetailsSheet
@@ -31,11 +32,12 @@ class PhotoViewerActivity : AppCompatActivity() {
     private var photos: List<Photo> = emptyList()
     private var chromeVisible = true
 
-    private val deleteLauncher =
+    private var pendingTrashId: Long = -1L
+    private val trashLauncher =
         registerForActivityResult(ActivityResultContracts.StartIntentSenderForResult()) { result ->
             if (result.resultCode == RESULT_OK) onDeleteConfirmed()
         }
-    private val deleter by lazy { PhotoDeleter(this, deleteLauncher) }
+    private val trasher by lazy { PhotoTrasher(this, trashLauncher) }
 
     private var pendingMoveUri: Uri? = null
     private var pendingMoveFolder: String = ""
@@ -94,7 +96,10 @@ class PhotoViewerActivity : AppCompatActivity() {
         MaterialAlertDialogBuilder(this)
             .setMessage(getString(R.string.delete_confirm_message))
             .setNegativeButton(getString(android.R.string.cancel), null)
-            .setPositiveButton(getString(R.string.delete)) { _, _ -> deleter.requestDelete(listOf(photo.uri)) }
+            .setPositiveButton(getString(R.string.delete)) { _, _ ->
+                pendingTrashId = photo.id
+                trasher.requestTrash(listOf(photo.uri))
+            }
             .show()
     }
 
@@ -197,6 +202,7 @@ class PhotoViewerActivity : AppCompatActivity() {
     }
 
     private fun onDeleteConfirmed() {
+        if (pendingTrashId != -1L) TrashTracker.recordTrashed(this, listOf(pendingTrashId))
         StreakTracker.recordOrganizedToday(this)
         val current = binding.pager.currentItem
         photos = photos.filterIndexed { index, _ -> index != current }

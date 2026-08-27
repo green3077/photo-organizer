@@ -7,7 +7,7 @@ import java.time.MonthDay
 
 /**
  * 연도 하나를 골라 그 해에 찍힌 모든 사진을 날짜별로 훑어보며 정리한다.
- * 홈 화면의 "날짜별" 탭은 여러 해에 걸쳐 반복되는 월/일만 추리는 반면,
+ * 홈 화면의 "날짜별" 탭은 여러 해에 걸쳐 반복되는 며칠(월 무관)만 추리는 반면,
  * 여기서는 그 연도 안의 모든 촬영일을 다 보여준다.
  */
 class YearDetailActivity : BasePhotoDetailActivity() {

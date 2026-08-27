@@ -9,6 +9,7 @@
     <uses-permission android:name="android.permission.ACCESS_MEDIA_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
 
     <application
         android:name=".PhotoOrganizerApp"
@@ -94,6 +95,11 @@
             android:name=".SettingsActivity"
             android:exported="false"
             android:label="@string/title_settings" />
+
+        <activity
+            android:name=".TrashActivity"
+            android:exported="false"
+            android:label="@string/title_trash" />
 
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
