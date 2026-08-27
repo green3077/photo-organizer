@@ -5,8 +5,7 @@
 ## 주요 기능
 
 - **홈 화면**: "날짜별 정리"/"달력으로 보기"/"장소별 정리" 세 메뉴만 심플하게 보여줍니다.
-  오른쪽 위에는 휴지통 아이콘과 설정(현재 버전 확인/업데이트) 아이콘이 있고, 화면 아래에는
-  배너 광고(AdMob)가 붙습니다.
+  오른쪽 위에는 휴지통 아이콘이 있고, 화면 아래에는 배너 광고(AdMob)가 붙습니다.
 - **날짜별 정리**: 일별(며칠 단위, 월 무관)과 월별 중 골라서 봅니다. 일별은 "몇 개 연도에
   걸쳐 같은 며칠(예: 15일)에 찍힌 사진들"만 추려 다가오는 날짜순으로 보여줍니다. 월은
   구분하지 않으므로 1월 15일, 3월 15일, 12월 15일에 찍은 사진이 모두 "15일" 한 그룹으로
@@ -31,8 +30,6 @@
   남은 일수가 표시됩니다. 선택한 사진을 복원하거나 완전삭제할 수 있고, 툴바의 "휴지통 비우기"로
   전체를 한 번에 완전삭제할 수도 있습니다. 휴지통에 보관된 지 14일이 지난 사진은 자동으로
   완전삭제됩니다(자세한 동작은 아래 기술 스택 참고).
-- **앱 내 업데이트 확인**(홈 화면 오른쪽 위 설정 아이콘): GitHub Releases의 최신 버전을 확인해
-  새 버전이 있으면 앱이 직접 APK를 받아 설치를 안내합니다.
 - 하루라도 정리(삭제/이동)하면 연속일수(스트릭)가 올라가고, 정리 화면 상단에 표시됩니다.
 
 ## 기술 스택
@@ -54,9 +51,6 @@
   대신 `TrashActivity`를 열 때마다 14일이 지난 사진을 자동으로 완전삭제 요청하고, 앱을
   열지 않고 있는 동안에는 `WorkManager` 1일 주기 워커(`TrashPurgeWorker`)가 만료된 사진이
   있으면 "휴지통 정리가 필요해요" 알림만 보내 앱을 열도록 유도합니다.
-- 앱 내 업데이트 확인은 GitHub Releases API(`UpdateChecker`)로 최신 태그(`v<versionCode>`)를
-  비교하고, 새 버전이 있으면 앱이 직접 APK를 받아(`UpdateDownloader`) 설치를 안내합니다. CI가
-  push마다 태그를 이 규칙(`v` + versionCode)으로 붙이므로 태그 이름을 바꾸면 안 됩니다.
 - AdMob(`com.google.android.gms.ads`)로 홈 화면에 배너 광고를 붙였습니다.
 - Coil(이미지·동영상 썸네일 로딩), ViewBinding, Coroutines
 - `PhotoViewerActivity`로 넘기는 사진 목록은 static 홀더(빠른 경로) + 인텐트에 담은 사진 ID
@@ -88,8 +82,7 @@ HomeActivity (런처)
 │   ├─ LocationActivity        — 나라별(해외) 정리
 │   │   └─ LocationDetailActivity — 특정 나라의 날짜별 사진
 │   └─ RegionActivity          — 지역별(국내) 정리, 여행 단위 자동 그룹핑
-├─ TrashActivity           — 휴지통 (복원/완전삭제/휴지통 비우기)
-└─ SettingsActivity        — 현재 버전 확인/업데이트
+└─ TrashActivity           — 휴지통 (복원/완전삭제/휴지통 비우기)
 
 모든 상세 화면(DetailActivity/MonthDetailActivity/LocationDetailActivity/YearDetailActivity 등)은
 공통으로 PhotoViewerActivity(사진 뷰어)로 이어집니다.
@@ -111,9 +104,22 @@ AndroidX/AGP 의존성을 받아올 수 없기 때문입니다.
 
 CI(GitHub Actions, `.github/workflows/build.yml`)가 main에 push될 때마다 유닛 테스트 + 디버그
 APK 빌드를 자동으로 돌리고, `app/build.gradle.kts`의 versionCode를 읽어 `v<versionCode>` 태그로
-GitHub Release를 만들어 APK를 첨부합니다(앱 내 업데이트 확인 기능이 이 태그 규칙에 의존하므로
-바꾸면 안 됩니다). 서명은 저장소에 커밋된 고정 디버그 키(`app/debug.keystore`)를 써서, 어디서
-빌드하든 항상 같은 서명이 나와 기기에 이미 설치된 앱 위에 덮어 설치할 수 있습니다.
+GitHub Release를 만들어 APK를 첨부합니다(사이드로딩/베타 배포용 — Play Store 정식 릴리스와는
+무관). 서명은 저장소에 커밋된 고정 디버그 키(`app/debug.keystore`)를 써서, 어디서 빌드하든
+항상 같은 서명이 나와 기기에 이미 설치된 앱 위에 덮어 설치할 수 있습니다.
+
+### Play Store용 릴리스 빌드
+
+Play Store에 올리는 서명된 릴리스(APK/AAB)는 디버그 키가 아니라 별도의 업로드 키를 씁니다.
+`keystore.properties.example`을 참고해 로컬에 `keystore.properties`(git에 커밋하지 않음)를
+만들고, keytool로 직접 생성한 release keystore 경로/비밀번호를 채운 뒤:
+
+```
+./gradlew bundleRelease   # Play Console 업로드용 .aab
+./gradlew assembleRelease # 서명된 .apk (필요할 때만)
+```
+
+`keystore.properties`가 없으면 release 서명 없이(디버그 빌드는 그대로) 넘어갑니다.
 
 ## 알아두면 좋은 점
 

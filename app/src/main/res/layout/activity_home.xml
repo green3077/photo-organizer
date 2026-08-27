@@ -36,15 +36,6 @@
             android:src="@drawable/ic_delete"
             android:contentDescription="@string/title_trash" />
 
-        <ImageButton
-            android:id="@+id/btnSettings"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:background="?attr/selectableItemBackgroundBorderless"
-            android:padding="12dp"
-            android:src="@drawable/ic_settings"
-            android:contentDescription="@string/title_settings" />
-
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView

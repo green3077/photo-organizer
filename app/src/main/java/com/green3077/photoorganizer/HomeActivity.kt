@@ -20,9 +20,6 @@ class HomeActivity : AppCompatActivity() {
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
 
-        binding.btnSettings.setOnClickListener {
-            startActivity(Intent(this, SettingsActivity::class.java))
-        }
         binding.btnTrash.setOnClickListener {
             startActivity(Intent(this, TrashActivity::class.java))
         }
