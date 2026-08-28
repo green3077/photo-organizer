@@ -16,14 +16,14 @@ val keystoreProperties = Properties().apply {
 
 android {
     namespace = "com.green3077.photoorganizer"
-    compileSdk = 34
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.green3077.photoorganizer"
         minSdk = 30
-        targetSdk = 34
-        versionCode = 17
-        versionName = "1.16"
+        targetSdk = 36
+        versionCode = 19
+        versionName = "1.18"
     }
 
     signingConfigs {
