@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">사진정리</string>
+    <string name="splash_tagline">날짜와 장소로 추억을 정리해요</string>
+    <string name="splash_feature_date">날짜별 정리</string>
+    <string name="splash_feature_location">장소별 정리</string>
+    <string name="splash_feature_trash">휴지통</string>
     <string name="title_detail">날짜별 사진</string>
     <string name="title_date_organize">날짜별 정리</string>
     <string name="title_day_organize">일별 정리</string>
