@@ -1,0 +1,44 @@
+name: Build FileFriend debug APK
+
+on:
+  push:
+    paths:
+      - 'filefriend/**'
+      - '.github/workflows/build-filefriend.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: filefriend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      # 실제 Firebase 프로젝트 설정 파일은 저장소에 커밋하지 않으므로, 컴파일/빌드
+      # 검증만을 위한 자리표시자 파일을 넣는다(google-services 플러그인은 이 파일이
+      # 있어야만 적용되고, 값 자체는 검증하지 않으므로 빌드 확인용으로 충분하다).
+      - name: Add placeholder google-services.json
+        run: cp app/google-services.json.example app/google-services.json
+
+      - name: Run unit tests
+        run: ./gradlew testDebugUnitTest --no-daemon
+
+      - name: Build debug APK
+        run: ./gradlew :app:assembleDebug --no-daemon
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: filefriend-debug
+          path: filefriend/app/build/outputs/apk/debug/app-debug.apk

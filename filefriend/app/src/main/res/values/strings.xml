@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">파일주고받기</string>
+    <string name="home_subtitle">가족끼리 3자리 코드로 사진·파일을 간편하게 주고받으세요</string>
+    <string name="title_send">파일 보내기</string>
+    <string name="title_receive">파일 받기</string>
+
+    <!-- 보내기 화면 -->
+    <string name="send_choose_file">보낼 파일을 선택해주세요</string>
+    <string name="send_choose_file_button">파일 선택</string>
+    <string name="send_uploading">업로드 중… %1$d%%</string>
+    <string name="send_code_ready_title">코드가 발급되었습니다</string>
+    <string name="send_code_ready_desc">아래 3자리 코드를 상대방에게 알려주세요</string>
+    <string name="send_time_left">남은 시간 %1$s</string>
+    <string name="send_expired">코드가 만료되었습니다</string>
+    <string name="send_copy_code">코드 복사</string>
+    <string name="send_share_code">코드 공유</string>
+    <string name="send_cancel">전송 취소</string>
+    <string name="send_code_copied">코드를 복사했습니다</string>
+    <string name="send_share_text">파일주고받기 앱에서 코드 %1$s 로 파일을 받아보세요</string>
+    <string name="send_error_no_file">파일을 선택하지 않았습니다</string>
+    <string name="send_error_upload_failed">업로드에 실패했습니다. 다시 시도해주세요</string>
+    <string name="send_error_read_failed">파일을 읽을 수 없습니다</string>
+
+    <!-- 받기 화면 -->
+    <string name="receive_input_title">받은 코드를 입력하세요</string>
+    <string name="receive_code_hint">3자리 코드</string>
+    <string name="receive_button">받기</string>
+    <string name="receive_downloading">다운로드 중… %1$d%%</string>
+    <string name="receive_success_title">파일을 받았습니다</string>
+    <string name="receive_success_desc">%1$s\nDownload/downloadfriend 폴더에 저장되었습니다</string>
+    <string name="receive_open_file">파일 열기</string>
+    <string name="receive_confirm">확인</string>
+    <string name="receive_error_invalid_code">코드는 숫자 3자리여야 합니다</string>
+    <string name="receive_error_not_found">코드를 찾을 수 없거나 이미 사용되었습니다</string>
+    <string name="receive_error_expired">코드가 만료되었습니다. 다시 요청해주세요</string>
+    <string name="receive_error_download_failed">다운로드에 실패했습니다. 다시 시도해주세요</string>
+
+    <string name="common_retry">다시 시도</string>
+    <string name="common_close">닫기</string>
+</resources>
