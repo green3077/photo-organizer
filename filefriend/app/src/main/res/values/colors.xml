@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="primary">#00A389</color>
+    <color name="primary_dark">#007A66</color>
+    <color name="background">#F4FBF9</color>
+    <color name="text_primary">#1B2B27</color>
+    <color name="text_secondary">#5F726D</color>
+    <color name="white">#FFFFFF</color>
+    <color name="error">#D64545</color>
+    <color name="card_send_start">#34D1BF</color>
+    <color name="card_send_end">#00897B</color>
+    <color name="card_receive_start">#5B8DEF</color>
+    <color name="card_receive_end">#2A5AC7</color>
+</resources>

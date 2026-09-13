@@ -13,3 +13,9 @@
 keystore.properties
 *.jks
 release.keystore
+
+# FileFriend(filefriend/) — Firebase 프로젝트 연결 정보, 절대 커밋하면 안 됨
+/filefriend/build
+/filefriend/app/build
+/filefriend/local.properties
+/filefriend/app/google-services.json
