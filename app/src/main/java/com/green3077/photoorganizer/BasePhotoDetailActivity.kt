@@ -16,6 +16,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.green3077.photoorganizer.data.FavoriteTracker
 import com.green3077.photoorganizer.data.PhotoMover
 import com.green3077.photoorganizer.data.PhotoRepository
 import com.green3077.photoorganizer.data.PhotoTrasher
@@ -37,8 +38,9 @@ import java.time.LocalDate
  *
  * 삭제/공유/이동은 툴바 메뉴 아이콘이 아니라 화면 아래 항상 고정된 버튼으로 뒀다 —
  * 툴바/액션바 메뉴는 기기·테마에 따라 표시 방식이 달라질 여지가 있어서, 항상
- * 같은 자리에 보이는 일반 뷰 버튼이 훨씬 확실하다. 사진마다 체크박스도 항상 보여줘서
- * 길게 누르는 숨은 제스처를 몰라도 바로 탭으로 선택할 수 있다.
+ * 같은 자리에 보이는 일반 뷰 버튼이 훨씬 확실하다. 체크 동그라미는 안드로이드 갤러리처럼
+ * 평소엔 숨겨져 있다가, 길게 눌러 드래그로 선택을 시작하면(DragSelectTouchListener) 그때부터
+ * 모든 사진에 나타나 탭으로 추가/해제할 수 있다.
  */
 abstract class BasePhotoDetailActivity : AppCompatActivity() {
 
@@ -108,7 +110,8 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
             isSelected = ::isPhotoSelected,
             onPhotoClick = ::onPhotoClick,
             onToggleSelect = ::toggleSelection,
-            onToggleSection = ::setSectionSelected
+            onToggleSection = ::setSectionSelected,
+            isFavorite = { id -> FavoriteTracker.isFavorite(this, id) }
         )
 
         val spanCount = 3

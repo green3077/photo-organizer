@@ -95,6 +95,11 @@
             android:exported="false"
             android:label="@string/title_trash" />
 
+        <activity
+            android:name=".FavoritesActivity"
+            android:exported="false"
+            android:label="@string/title_favorites" />
+
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
             android:value="ca-app-pub-1496691223826686~3109244563" />

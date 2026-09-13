@@ -9,8 +9,13 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
+import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.green3077.photoorganizer.data.FavoriteTracker
 import com.green3077.photoorganizer.data.PhotoDetailsLoader
 import com.green3077.photoorganizer.data.PhotoMover
 import com.green3077.photoorganizer.data.PhotoRepository
@@ -53,9 +58,13 @@ class PhotoViewerActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setSupportActionBar(binding.toolbar)
+        applyWindowInsets()
         binding.toolbar.setNavigationOnClickListener { finish() }
         binding.btnDelete.setOnClickListener {
             photos.getOrNull(binding.pager.currentItem)?.let { photo -> confirmDelete(photo) }
+        }
+        binding.btnFavorite.setOnClickListener {
+            photos.getOrNull(binding.pager.currentItem)?.let { toggleFavorite(it) }
         }
         binding.btnShare.setOnClickListener {
             photos.getOrNull(binding.pager.currentItem)?.let { sharePhoto(it) }
@@ -63,6 +72,11 @@ class PhotoViewerActivity : AppCompatActivity() {
         binding.btnMore.setOnClickListener { view ->
             photos.getOrNull(binding.pager.currentItem)?.let { showMoreMenu(view, it) }
         }
+        binding.pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+            override fun onPageSelected(position: Int) {
+                photos.getOrNull(position)?.let { updateFavoriteIcon(it) }
+            }
+        })
 
         val cached = PhotoViewerHolder.photos
         if (cached.isNotEmpty()) {
@@ -198,7 +212,36 @@ class PhotoViewerActivity : AppCompatActivity() {
 
     private fun showPager(index: Int) {
         binding.pager.adapter = PhotoPagerAdapter(photos, onSingleTap = ::toggleChrome)
-        binding.pager.setCurrentItem(index.coerceIn(0, photos.size - 1), false)
+        val current = index.coerceIn(0, photos.size - 1)
+        binding.pager.setCurrentItem(current, false)
+        photos.getOrNull(current)?.let { updateFavoriteIcon(it) }
+    }
+
+    /** 시스템 제스처/뒤로가기 바(내비게이션 바)가 하단 버튼 줄과, 상태 바가 툴바와 겹치지 않게 여백을 준다. */
+    private fun applyWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
+            binding.toolbar.updatePadding(top = systemBars.top)
+            binding.bottomActionBar.updatePadding(bottom = systemBars.bottom)
+            insets
+        }
+    }
+
+    private fun toggleFavorite(photo: Photo) {
+        val nowFavorite = FavoriteTracker.toggle(this, photo.id)
+        updateFavoriteIcon(photo)
+        Toast.makeText(
+            this,
+            getString(if (nowFavorite) R.string.favorite_added else R.string.favorite_removed),
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    private fun updateFavoriteIcon(photo: Photo) {
+        binding.iconFavorite.setImageResource(
+            if (FavoriteTracker.isFavorite(this, photo.id)) R.drawable.ic_star_filled_yellow
+            else R.drawable.ic_star_outline_white
+        )
     }
 
     private fun onDeleteConfirmed() {
@@ -211,7 +254,9 @@ class PhotoViewerActivity : AppCompatActivity() {
             return
         }
         binding.pager.adapter = PhotoPagerAdapter(photos, onSingleTap = ::toggleChrome)
-        binding.pager.setCurrentItem(current.coerceAtMost(photos.size - 1), false)
+        val nextIndex = current.coerceAtMost(photos.size - 1)
+        binding.pager.setCurrentItem(nextIndex, false)
+        photos.getOrNull(nextIndex)?.let { updateFavoriteIcon(it) }
     }
 
     companion object {

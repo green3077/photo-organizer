@@ -17,14 +17,18 @@ sealed class DetailRow {
 
 /**
  * 연도별(날짜 상세)이든 날짜별(장소 상세)이든, 문자열 라벨을 키로 하는 섹션 목록을 그린다.
- * 모든 사진에 체크박스를 항상 보여줘서 탭 한 번으로 선택할 수 있고, 길게 눌러 손을 떼지
- * 않은 채 드래그하면 지나가는 사진들이 잇달아 선택된다(DragSelectTouchListener가 처리).
+ * 안드로이드 갤러리 앱과 동일하게, 평소에는 체크 동그라미를 숨겨 두고 아무것도 선택되지
+ * 않은 상태에서는 사진을 탭하면 바로 열린다. 길게 눌러 손을 떼지 않은 채 드래그하면
+ * 지나가는 사진들이 잇달아 선택되며(DragSelectTouchListener가 처리) 이때부터 선택
+ * 모드로 들어가 모든 사진에 체크 동그라미가 나타나고, 이후에는 탭 한 번으로 선택을
+ * 추가/해제할 수 있다. 즐겨찾기(별표) 표시는 여기서는 바꿀 수 없고 사진 뷰어에서만 바뀐다.
  */
 class DetailListAdapter(
     private val isSelected: (Long) -> Boolean,
     private val onPhotoClick: (Photo) -> Unit,
     private val onToggleSelect: (Photo) -> Unit,
-    private val onToggleSection: (photos: List<Photo>, selected: Boolean) -> Unit
+    private val onToggleSection: (photos: List<Photo>, selected: Boolean) -> Unit,
+    private val isFavorite: (Long) -> Boolean = { false }
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val items = mutableListOf<DetailRow>()
@@ -65,6 +69,10 @@ class DetailListAdapter(
         return photos
     }
 
+    /** 하나라도 선택된 사진이 있으면 "선택 모드"로 보고, 이때만 체크 동그라미들을 보여준다. */
+    private fun hasAnySelected(): Boolean =
+        items.any { it is DetailRow.PhotoRow && isSelected(it.photo.id) }
+
     override fun getItemViewType(position: Int) = when (items[position]) {
         is DetailRow.SectionHeader -> TYPE_HEADER
         is DetailRow.PhotoRow -> TYPE_PHOTO
@@ -97,6 +105,7 @@ class DetailListAdapter(
             val position = bindingAdapterPosition
             val photos = if (position != RecyclerView.NO_POSITION) photosInSectionAt(position) else emptyList()
             val allSelected = photos.isNotEmpty() && photos.all { isSelected(it.id) }
+            binding.checkIcon.visibility = if (hasAnySelected()) View.VISIBLE else View.GONE
             binding.checkIcon.setImageResource(
                 if (allSelected) R.drawable.ic_check_circle_filled else R.drawable.ic_check_circle_outline
             )
@@ -111,17 +120,16 @@ class DetailListAdapter(
             binding.videoBadge.visibility = if (photo.isVideo) View.VISIBLE else View.GONE
             val selected = isSelected(photo.id)
             binding.checkOverlay.visibility = if (selected) View.VISIBLE else View.GONE
+            binding.checkIcon.visibility = if (hasAnySelected()) View.VISIBLE else View.GONE
             binding.checkIcon.setImageResource(
                 if (selected) R.drawable.ic_check_circle_filled else R.drawable.ic_check_circle_outline
             )
             binding.checkIcon.setOnClickListener { onToggleSelect(photo) }
+            binding.favoriteBadge.visibility = if (isFavorite(photo.id)) View.VISIBLE else View.GONE
             binding.root.setOnClickListener {
                 if (isSelected(photo.id) || hasAnySelected()) onToggleSelect(photo) else onPhotoClick(photo)
             }
         }
-
-        private fun hasAnySelected(): Boolean =
-            items.any { it is DetailRow.PhotoRow && isSelected(it.photo.id) }
     }
 
     companion object {

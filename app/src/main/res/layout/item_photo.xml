@@ -23,6 +23,16 @@
         android:visibility="gone"
         tools:ignore="ContentDescription" />
 
+    <ImageView
+        android:id="@+id/favoriteBadge"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="4dp"
+        android:src="@drawable/ic_star_badge"
+        android:visibility="gone"
+        tools:ignore="ContentDescription" />
+
     <View
         android:id="@+id/checkOverlay"
         android:layout_width="match_parent"

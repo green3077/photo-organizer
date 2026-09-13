@@ -32,6 +32,9 @@ class HomeActivity : AppCompatActivity() {
         binding.cardLocation.setOnClickListener {
             startActivity(Intent(this, PlaceChooserActivity::class.java))
         }
+        binding.cardFavorites.setOnClickListener {
+            startActivity(Intent(this, FavoritesActivity::class.java))
+        }
 
         binding.adView.loadAd(AdRequest.Builder().build())
     }
