@@ -21,6 +21,14 @@
         android:paddingVertical="6dp"
         android:textColor="#FFFFFF" />
 
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/reconnectButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:text="@string/controller_reconnect"
+        android:visibility="gone" />
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/disconnectButton"
         android:layout_width="wrap_content"

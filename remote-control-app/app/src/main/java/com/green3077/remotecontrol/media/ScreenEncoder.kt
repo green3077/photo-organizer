@@ -3,6 +3,7 @@ package com.green3077.remotecontrol.media
 import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
+import android.os.Bundle
 import android.view.Surface
 import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicBoolean
@@ -42,9 +43,27 @@ class ScreenEncoder(
         drainThread = Thread(::drainLoop, "ScreenEncoder-drain").apply { start() }
     }
 
+    /**
+     * Forces the next frame to be a full IDR keyframe. Called whenever a new controller connects
+     * so it gets a complete, decodable picture right away instead of waiting for the next
+     * scheduled I-frame interval.
+     */
+    fun requestKeyFrame() {
+        val params = Bundle().apply { putInt(MediaCodec.PARAMETER_KEY_REQUEST_SYNC_FRAME, 0) }
+        try {
+            codec.setParameters(params)
+        } catch (e: Exception) {
+            // Best-effort: if this fails the periodic I-frame interval still guarantees a keyframe.
+        }
+    }
+
     private fun drainLoop() {
         val bufferInfo = MediaCodec.BufferInfo()
-        var pendingConfig: ByteArray? = null
+        // Some encoders only emit codec-config (SPS/PPS) once at startup rather than before every
+        // forced keyframe, so we cache the latest one and prepend it to every keyframe we send —
+        // that way a controller that (re)connects after startup always gets a fully self-contained
+        // keyframe it can decode on its own.
+        var lastConfig: ByteArray? = null
         while (running.get()) {
             val outputIndex = try {
                 codec.dequeueOutputBuffer(bufferInfo, 100_000)
@@ -60,15 +79,11 @@ class ScreenEncoder(
                 outputBuffer.get(chunk)
 
                 if (bufferInfo.flags and MediaCodec.BUFFER_FLAG_CODEC_CONFIG != 0) {
-                    pendingConfig = chunk
+                    lastConfig = chunk
                 } else {
                     val isKeyFrame = bufferInfo.flags and MediaCodec.BUFFER_FLAG_KEY_FRAME != 0
-                    val data = if (pendingConfig != null) {
-                        pendingConfig!! + chunk
-                    } else {
-                        chunk
-                    }
-                    pendingConfig = null
+                    val config = lastConfig
+                    val data = if (isKeyFrame && config != null) config + chunk else chunk
                     onFrame(data, bufferInfo.presentationTimeUs, isKeyFrame)
                 }
             }
@@ -81,11 +96,6 @@ class ScreenEncoder(
         if (!running.compareAndSet(true, false)) return
         drainThread?.join(500)
         drainThread = null
-        try {
-            codec.signalEndOfInputStream()
-        } catch (e: Exception) {
-            // ignore, we are tearing down anyway
-        }
         try {
             codec.stop()
         } catch (e: Exception) {

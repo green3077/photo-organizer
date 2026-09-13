@@ -185,6 +185,7 @@ class HostForegroundService : Service() {
 
             activeSocket = socket
             activeOutput = output
+            encoder?.requestKeyFrame()
             listener?.onStatus(Status.CONNECTED)
 
             while (true) {
