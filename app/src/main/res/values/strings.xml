@@ -79,6 +79,9 @@
     <string name="toggle_grid_view">바둑판 보기</string>
     <string name="toggle_list_view">목록 보기</string>
 
+    <string name="sort_newest_first">최신순</string>
+    <string name="sort_oldest_first">오래된순</string>
+
     <string name="no_video_player">동영상을 재생할 앱을 찾을 수 없어요.</string>
 
     <string name="more">더보기</string>

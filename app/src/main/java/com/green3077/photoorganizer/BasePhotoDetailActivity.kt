@@ -50,6 +50,7 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
     private var allPhotosByDate: Map<LocalDate, List<Photo>> = emptyMap()
     private var photosByDate: Map<LocalDate, List<Photo>> = emptyMap()
     private var yearFilter: Int? = null
+    private var sortAscending = false
     private val selectedIds = mutableSetOf<Long>()
     private var pendingMoveUris: List<Uri> = emptyList()
     private var pendingMoveFolder: String = ""
@@ -105,6 +106,19 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
         binding.btnDelete.setOnClickListener { confirmDelete() }
         binding.btnShare.setOnClickListener { confirmShare() }
         binding.btnMove.setOnClickListener { confirmMove() }
+
+        binding.toolbar.setOnMenuItemClickListener { item ->
+            when (item.itemId) {
+                R.id.action_toggle_sort -> {
+                    sortAscending = !sortAscending
+                    updateSortMenuItem()
+                    applyFilterAndRender()
+                    true
+                }
+                else -> false
+            }
+        }
+        updateSortMenuItem()
 
         adapter = DetailListAdapter(
             isSelected = ::isPhotoSelected,
@@ -180,8 +194,24 @@ abstract class BasePhotoDetailActivity : AppCompatActivity() {
         }
     }
 
+    private fun updateSortMenuItem() {
+        val item = binding.toolbar.menu.findItem(R.id.action_toggle_sort) ?: return
+        if (sortAscending) {
+            item.setIcon(R.drawable.ic_sort_oldest)
+            item.setTitle(R.string.sort_oldest_first)
+        } else {
+            item.setIcon(R.drawable.ic_sort_newest)
+            item.setTitle(R.string.sort_newest_first)
+        }
+    }
+
+    /** 같은 날짜(섹션) 안에서 촬영 시각 기준으로 빠른 순/늦은 순을 고른다. */
+    private fun sortWithinDate(photos: List<Photo>): List<Photo> =
+        if (sortAscending) photos.sortedBy { it.takenAtMillis } else photos.sortedByDescending { it.takenAtMillis }
+
     private fun applyFilterAndRender() {
-        photosByDate = yearFilter?.let { year -> allPhotosByDate.filterKeys { it.year == year } } ?: allPhotosByDate
+        photosByDate = (yearFilter?.let { year -> allPhotosByDate.filterKeys { it.year == year } } ?: allPhotosByDate)
+            .mapValues { (_, photos) -> sortWithinDate(photos) }
         selectedIds.retainAll(photosByDate.values.flatten().map { it.id }.toSet())
         val sections = photosByDate.mapKeys { (date, _) -> sectionLabel(date) }
         adapter.submit(sections)

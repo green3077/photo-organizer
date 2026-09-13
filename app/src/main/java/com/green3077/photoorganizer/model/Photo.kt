@@ -8,7 +8,8 @@ data class Photo(
     val uri: Uri,
     val dateTaken: LocalDate,
     val displayName: String,
-    val isVideo: Boolean = false
+    val isVideo: Boolean = false,
+    val takenAtMillis: Long = 0L
 )
 
 data class MemoryGroup(

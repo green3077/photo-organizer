@@ -65,7 +65,7 @@ class PhotoRepository(private val context: Context) {
 
                 val date = Instant.ofEpochMilli(millis).atZone(zone).toLocalDate()
                 val uri = ContentUris.withAppendedId(collection, id)
-                photos.add(Photo(id, uri, date, it.getString(nameCol) ?: "", isVideo))
+                photos.add(Photo(id, uri, date, it.getString(nameCol) ?: "", isVideo, millis))
             }
         }
         return photos
